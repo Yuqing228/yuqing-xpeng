@@ -1,0 +1,31 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="320" height="320" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="&#230;&#137;&#171;&#230;&#143;&#143;&#229;&#186;&#149;&#231;&#155;&#152;">
+<circle id="&#229;&#164;&#150;&#228;&#190;&#167;&#231;&#187;&#134;&#232;&#189;&#168;&#233;&#129;&#147;" cx="160" cy="160" r="159.5" stroke="#FFD9A5" stroke-opacity="0.1"/>
+<g id="&#231;&#129;&#176;&#232;&#137;&#178;&#229;&#156;&#134;&#231;&#142;&#175;&#232;&#189;&#168;&#233;&#129;&#147;">
+<circle cx="160" cy="160" r="130" fill="#FFD9A5" fill-opacity="0.03"/>
+<circle cx="160" cy="160" r="129.5" stroke="#FFD9A5" stroke-opacity="0.1"/>
+</g>
+<g id="&#228;&#184;&#173;&#229;&#191;&#131;&#231;&#138;&#182;&#230;&#128;&#129;&#229;&#156;&#134;&#231;&#155;&#152;">
+<path d="M160 69.5996C209.93 69.5996 250.4 109.853 250.4 159.5C250.4 209.147 209.93 249.4 160 249.4C110.07 249.4 69.5996 209.147 69.5996 159.5C69.5996 109.853 110.07 69.5996 160 69.5996Z" fill="url(#paint0_linear_0_11)"/>
+<path d="M160 69.5996C209.93 69.5996 250.4 109.853 250.4 159.5C250.4 209.147 209.93 249.4 160 249.4C110.07 249.4 69.5996 209.147 69.5996 159.5C69.5996 109.853 110.07 69.5996 160 69.5996Z" fill="url(#paint1_radial_0_11)"/>
+<path d="M160 69.5996C209.93 69.5996 250.4 109.853 250.4 159.5C250.4 209.147 209.93 249.4 160 249.4C110.07 249.4 69.5996 209.147 69.5996 159.5C69.5996 109.853 110.07 69.5996 160 69.5996Z" stroke="url(#paint2_linear_0_11)" stroke-width="1.2"/>
+</g>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_11" x1="86.9419" y1="87.0982" x2="222.703" y2="231.748" gradientUnits="userSpaceOnUse">
+<stop stop-color="#424141"/>
+<stop offset="0.506909" stop-color="#1D1B19"/>
+<stop offset="1" stop-color="#604E33"/>
+</linearGradient>
+<radialGradient id="paint1_radial_0_11" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(160 159.5) scale(91 90.5)">
+<stop stop-color="#1D1B19" stop-opacity="0.95"/>
+<stop offset="0.65" stop-color="#1D1B19" stop-opacity="0.86"/>
+<stop offset="1" stop-color="#191A1D" stop-opacity="0"/>
+</radialGradient>
+<linearGradient id="paint2_linear_0_11" x1="86.9419" y1="87.0982" x2="214.382" y2="217.073" gradientUnits="userSpaceOnUse">
+<stop stop-color="#D7C7AB" stop-opacity="0.75"/>
+<stop offset="0.5" stop-color="#7D7464" stop-opacity="0.2"/>
+<stop offset="1" stop-color="#F3D49C" stop-opacity="0.9"/>
+</linearGradient>
+</defs>
+</svg>

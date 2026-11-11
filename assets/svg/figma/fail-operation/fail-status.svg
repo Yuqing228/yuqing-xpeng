@@ -1,0 +1,9 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Group">
+<mask id="stroke0_0_7" fill="white">
+<path d="M12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24Z"/>
+</mask>
+<path id="Vector" d="M24 12C24 18.6274 18.6274 24 12 24C5.37258 24 0 18.6274 0 12C0 5.37258 5.37258 0 12 0C18.6274 0 24 5.37258 24 12Z" stroke-width="4.32" stroke-linecap="round" stroke-linejoin="round" stroke="#F55B64" mask="url(#stroke0_0_7)"/>
+<path id="Vector_2" d="M8.00016 7.99992L12.0002 11.9999M12.0002 11.9999L16.0002 15.9999M12.0002 11.9999L16.0002 7.99992M12.0002 11.9999L8.00016 15.9999" stroke-width="2.16" stroke-linecap="round" stroke-linejoin="round" stroke="#F55B64"/>
+</g>
+</svg>

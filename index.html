@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>开机点检 · 双屏预览</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="preview-bar" id="previewBar">
+    <div class="preview-brand"><span class="brand-dot"></span><span>开机点检 · 双屏预览</span></div>
+    <div class="step-switch" role="group" aria-label="点检步骤切换">
+      <button class="step-button" data-step="s1" aria-pressed="false"><b>S1</b> 登录</button>
+      <button class="step-button" data-step="s2" aria-pressed="false"><b>S2</b> 软件与双屏</button>
+      <button class="step-button" data-step="s3" aria-pressed="false"><b>S3</b> 声音外放</button>
+      <button class="step-button" data-step="h1" aria-pressed="false"><b>H1</b> 套件连接</button>
+      <button class="step-button active" data-step="h2" aria-pressed="true"><b>H2</b> 方向盘</button>
+      <button class="step-button" data-step="h3" aria-pressed="false"><b>H3</b> 按键拨片</button>
+      <button class="step-button" data-step="h4" aria-pressed="false"><b>H4</b> 踏板</button>
+      <button class="step-button" data-step="h5" aria-pressed="false"><b>H5</b> 触摸</button>
+    </div>
+    <div class="mode-switch" role="group" aria-label="预览布局切换">
+      <button class="mode-button active" data-view="dual" aria-pressed="true">双屏视图</button>
+      <button class="mode-button" data-view="touch-focus" aria-pressed="false">放大触控屏</button>
+    </div>
+    <div class="preview-meta"><span id="scaleLabel">100%</span><button id="hideControls" title="隐藏预览栏">隐藏控制栏</button></div>
+    <div class="demo-switch" role="group" aria-label="演示控制">
+      <button data-wheel="1" class="active" aria-pressed="true">方向盘1</button><button data-wheel="2" aria-pressed="false">方向盘2</button>
+      <button data-demo="ready">就绪</button><button data-demo="play">播放点检</button><button data-demo="pause">暂停</button><button data-demo="pass">通过结果</button><button data-demo="fail">失败结果</button>
+      <label>模拟失败<select id="failureSelect"><option value="none">不模拟</option><option value="h4">电门踏板无响应</option><option value="h2">方向盘回正异常</option><option value="h3-key">按键 P 无响应</option><option value="h3-normal">按键 A 无响应</option><option value="s3">外放无声</option></select></label>
+    </div>
+  </header>
+
+  <main class="viewport" id="viewport">
+    <div class="preview-frame preview-frame-wide" id="widePreviewFrame" aria-hidden="true"><span>带鱼屏 · 5120 × 1440 · 点检主画面 / 结果</span></div>
+    <div class="preview-frame preview-frame-operation" id="operationPreviewFrame" aria-hidden="true"><span>触控屏 · 1920 × 1080 · 一键点检 / 引导操作</span></div>
+    <section class="screen wide-screen active" id="wideH2Screen" data-width="5120" data-height="1440" aria-label="H2方向盘带鱼屏">
+      <header class="wide-v2-header">
+        <div class="wide-v2-title"><img src="assets/svg/wide-calendar-search.svg" width="48" height="48" alt=""><h1>远程代驾 · 座舱开机点检</h1><b>点检中 4/8</b></div>
+        <div class="wide-v2-info"><span><em>座舱</em>E12</span><i></i><span><em>设备</em>3C:58:C2:9F:1A:07</span><i></i><span><em>安全员</em>张伟 · XP88023</span><i></i><span>2026/10/28 12:04:53</span></div>
+      </header>
+
+      <aside class="wide-v2-sidebar js-flow-sidebar" data-current="h2">
+        <section class="wide-v2-group wide-v2-software">
+          <div class="wide-v2-group-title"><img src="assets/svg/figma/wide-s1/software.svg" width="66" height="66" alt=""><h2>软件点检</h2></div>
+          <div class="wide-v2-list">
+            <div class="wide-v2-row"><span>S1</span><strong>安全员登录信息校验</strong><img src="assets/svg/wide-sidebar-complete.svg" width="36" height="36" alt="已完成"></div>
+            <div class="wide-v2-row"><span>S2</span><strong>软件启动与双屏显示</strong><img src="assets/svg/wide-sidebar-complete.svg" width="36" height="36" alt="已完成"></div>
+            <div class="wide-v2-row"><span>S3</span><strong>声音外放</strong><img src="assets/svg/wide-sidebar-complete.svg" width="36" height="36" alt="已完成"></div>
+            <div class="wide-v2-row"><span>H1</span><strong>操作套件连接</strong><img src="assets/svg/wide-sidebar-complete.svg" width="36" height="36" alt="已完成"></div>
+          </div>
+        </section>
+        <img class="wide-v2-divider" src="assets/svg/wide-sidebar-divider.svg" width="1296" height="2" alt="">
+        <section class="wide-v2-group wide-v2-hardware">
+          <div class="wide-v2-group-title"><img src="assets/svg/figma/wide-s1/hardware.svg" width="66" height="66" alt=""><h2>硬件点检</h2></div>
+          <div class="wide-v2-list">
+            <div class="wide-v2-row"><span>H1</span><strong>操作套件连接</strong><img src="assets/svg/wide-sidebar-complete-alt.svg" width="36" height="36" alt="已完成"></div>
+            <div class="wide-v2-row current"><span>H2</span><strong>方向盘</strong><img src="assets/svg/wide-sidebar-current.svg" width="36" height="36" alt="当前"></div>
+            <div class="wide-v2-row pending"><span>H3</span><strong>方向盘按键与拨片</strong><img src="assets/svg/wide-sidebar-pending.svg" width="36" height="36" alt="待点检"></div>
+            <div class="wide-v2-row pending"><span>H4</span><strong>刹车/电门踏板</strong><img src="assets/svg/wide-sidebar-pending.svg" width="36" height="36" alt="待点检"></div>
+            <div class="wide-v2-row pending"><span>H5</span><strong>触控屏触摸输入</strong><img src="assets/svg/wide-sidebar-pending.svg" width="36" height="36" alt="待点检"></div>
+          </div>
+        </section>
+      </aside>
+
+      <section class="wide-v2-main steering-interactive" data-steering-screen="wide">
+        <div class="wide-v2-main-title"><span>H2</span><h2>方向盘</h2></div>
+        <h3>请配合完成方向盘转向点检</h3>
+        <img class="wide-v2-gauge" src="assets/svg/figma/wide-h2-gauge-exact.svg" width="650" height="217" alt="">
+        <svg class="steering-dynamic-gauge steering-dynamic-wide" viewBox="0 0 650 217" aria-hidden="true"><path class="steering-progress-arc" d="M37.8342 199.057 C67.7414 151.196 109.332 111.728 158.693 84.3668 C208.054 57.0054 263.564 42.6496 320.001 42.6496 C376.438 42.6496 431.948 57.0054 481.309 84.3668 C528.891 110.742 569.252 148.367 598.888 193.915"/><g class="steering-pointer"><path d="M0 0 C1.5 0 2.8 1 3.6 2.4 L11 17.4 C12.9 21.2 10.2 24 6.4 24 H-6.4 C-10.2 24 -12.9 21.2 -11 17.4 L-3.6 2.4 C-2.8 1 -1.5 0 0 0 Z"/></g></svg>
+        <img class="wide-v2-wheel" data-steering-wheel src="assets/images/figma/steering-wheel-updated.png" width="656" height="685" alt="可转动方向盘" draggable="false" role="slider" tabindex="0" aria-valuemin="-450" aria-valuemax="450" aria-valuenow="0" aria-label="转动方向盘">
+        <div class="step-pills wide-v2-steps" data-steering-steps><span class="selected">① 自动转动</span><span>② 左右打死</span><span>③ 回正与阻尼</span></div>
+        <div class="wide-v2-angle"><span>回转角度</span><strong data-steering-angle>正中0°</strong><span data-steering-maximum>最大左 0° / 右 0°</span></div>
+        <div class="wide-v2-turning" data-steering-status>请转动方向盘，开始检测</div>
+        <div class="wide-v2-progress-label">点检进度</div><strong class="wide-v2-progress-current">4</strong><span class="wide-v2-progress-total">/ 8</span>
+        <div class="wide-v2-progress-track"><b></b></div>
+      </section>
+    </section>
+
+    <section class="screen operation-screen" id="operationH2Screen" data-width="1920" data-height="1080" aria-label="H2方向盘操作屏">
+      <header class="op-header">
+        <div class="op-title"><span><img src="assets/svg/op-calendar-search.svg" width="46" height="46" alt=""></span><h1>开机点检</h1><b>点检中 4/8</b></div>
+        <div class="op-user"><span><em>安全员</em>张伟 · XP88023</span><i></i><span><em>座舱</em>E12</span></div>
+      </header>
+      <aside class="op-sidebar js-flow-sidebar" data-current="h2">
+        <section>
+          <div class="op-category"><img src="assets/svg/figma/wide-s1/software.svg" width="44" height="44" alt=""><h2>软件点检</h2></div>
+          <div class="op-list">
+            <div><span>S1</span><strong>安全员登录信息校验</strong><img src="assets/svg/op-complete.svg" width="24" height="24" alt="完成"></div>
+            <div><span>S2</span><strong>软件启动与双屏显示</strong><img src="assets/svg/op-complete.svg" width="24" height="24" alt="完成"></div>
+            <div><span>S3</span><strong>声音外放</strong><img src="assets/svg/op-complete.svg" width="24" height="24" alt="完成"></div>
+            <div><span>H1</span><strong>操作套件连接</strong><img src="assets/svg/op-complete.svg" width="24" height="24" alt="完成"></div>
+          </div>
+        </section>
+        <img class="op-divider" src="assets/svg/op-divider.svg" width="429" height="1" alt="">
+        <section class="op-hardware-section">
+          <div class="op-category"><img src="assets/svg/figma/wide-s1/hardware.svg" width="44" height="44" alt=""><h2>硬件点检</h2></div>
+          <div class="op-list">
+            <div><span>H1</span><strong>操作套件连接</strong><img src="assets/svg/op-complete-alt.svg" width="24" height="24" alt="完成"></div>
+            <div class="current"><span>H2</span><strong>方向盘</strong><img src="assets/svg/op-current.svg" width="24" height="24" alt="当前"></div>
+            <div class="pending"><span>H3</span><strong>方向盘按键与拨片</strong><img src="assets/svg/op-pending.svg" width="24" height="24" alt="待点检"></div>
+            <div class="pending"><span>H4</span><strong>刹车/电门踏板</strong><img src="assets/svg/op-pending.svg" width="24" height="24" alt="待点检"></div>
+            <div class="pending"><span>H5</span><strong>触控屏触摸输入</strong><img src="assets/svg/op-pending.svg" width="24" height="24" alt="待点检"></div>
+          </div>
+        </section>
+      </aside>
+      <main class="op-main steering-interactive" data-steering-screen="operation">
+        <div class="op-main-title"><span>H2</span><h2>方向盘</h2></div>
+        <div class="step-pills op-steps" data-steering-steps><span class="selected">① 自动转动</span><span>② 左右打死</span><span>③ 回正与阻尼</span></div>
+        <img class="op-gauge" src="assets/svg/figma/op-h2-gauge-exact.svg" width="628" height="217" alt="">
+        <svg class="steering-dynamic-gauge steering-dynamic-op" viewBox="0 0 628 217" aria-hidden="true"><path class="steering-progress-arc" d="M37.8342 199.057 C67.7414 151.196 109.332 111.728 158.693 84.3668 C208.054 57.0054 263.564 42.6496 320.001 42.6496 C376.438 42.6496 431.948 57.0054 481.309 84.3668 C528.891 110.742 569.252 148.367 598.888 193.915"/><g class="steering-pointer"><path d="M0 0 C1.5 0 2.8 1 3.6 2.4 L11 17.4 C12.9 21.2 10.2 24 6.4 24 H-6.4 C-10.2 24 -12.9 21.2 -11 17.4 L-3.6 2.4 C-2.8 1 -1.5 0 0 0 Z"/></g></svg>
+        <img class="op-wheel" data-steering-wheel src="assets/images/figma/steering-wheel-updated.png" width="469" height="490" alt="可转动方向盘" draggable="false" role="slider" tabindex="0" aria-valuemin="-450" aria-valuemax="450" aria-valuenow="0" aria-label="转动方向盘">
+        <div class="steering-angle-badge" data-steering-angle>正中0°</div>
+        <div class="op-angle"><span>回转角度</span><strong data-steering-angle>正中0°</strong><span data-steering-maximum>最大左 0° / 右 0°</span></div>
+        <div class="op-turning" data-steering-status>请转动方向盘，开始检测</div>
+        <div class="steering-damping-actions" data-steering-damping hidden><button type="button" data-damping="normal">阻尼正常</button><button type="button" data-damping="abnormal">阻尼异常</button></div>
+      </main>
+      <footer class="op-footer"><div><span class="inspection-footer-copy">点检中 · 请按屏幕提示操作</span></div><div><b class="inspection-footer-action"><img src="assets/images/figma/warning.png" width="24" height="24" alt="">跳过点检</b></div></footer>
+    </section>
+
+    <section class="screen wide-screen flow-wide figma-wide-s1" id="wideS1Screen" data-width="5120" data-height="1440" aria-label="S1登录带鱼屏">
+      <header class="wide-v2-header">
+        <div class="wide-v2-title"><img src="assets/svg/figma/wide-s1/calendar-search.svg" width="48" height="48" alt=""><h1>远程代驾 · 座舱开机点检</h1><b>点检中 4/8</b></div>
+        <div class="wide-v2-info"><span><em>座舱</em>E12</span><i></i><span><em>设备</em>3C:58:C2:9F:1A:07</span><i></i><span><em>安全员</em>张伟 · XP88023</span><i></i><span>2026/10/28 12:04:53</span></div>
+      </header>
+      <aside class="wide-v2-sidebar js-flow-sidebar" data-current="s1">
+        <div class="flow-wide-row current"><span>S1</span><strong>登录状态</strong><img src="assets/svg/wide-sidebar-current.svg" width="36" height="36" alt="进行中"></div>
+        <div class="flow-wide-row"><span>S2</span><strong>软件与双屏</strong><img src="assets/svg/wide-sidebar-complete.svg" width="36" height="36" alt="已完成"></div>
+        <div class="flow-wide-row pending"><span>S3</span><strong>声音外放</strong><img src="assets/svg/wide-sidebar-pending.svg" width="36" height="36" alt="待点检"></div>
+        <div class="flow-wide-row pending"><span>H1</span><strong>操作套件连接</strong><img src="assets/svg/wide-sidebar-pending.svg" width="36" height="36" alt="待点检"></div>
+        <div class="flow-wide-row pending"><span>H2</span><strong>方向盘转向</strong><img src="assets/svg/wide-sidebar-pending.svg" width="36" height="36" alt="待点检"></div>
+        <div class="flow-wide-row pending"><span>H3</span><strong>方向盘按键与拨片</strong><img src="assets/svg/wide-sidebar-pending.svg" width="36" height="36" alt="待点检"></div>
+        <div class="flow-wide-row pending"><span>H4</span><strong>刹车与电门踏板</strong><img src="assets/svg/wide-sidebar-pending.svg" width="36" height="36" alt="待点检"></div>
+        <div class="flow-wide-row pending"><span>H5</span><strong>触控屏触摸</strong><img src="assets/svg/wide-sidebar-pending.svg" width="36" height="36" alt="待点检"></div>
+      </aside>
+      <main class="flow-wide-main">
+        <div class="flow-heading"><div><b>S1</b><span>登录状态</span></div></div>
+        <h2>正在校验你的登录状态</h2>
+        <div class="wide-login-card">
+          <div class="wide-login-top"><img src="assets/svg/figma/wide-s1/lock-header.svg" width="36" height="36" alt="">统一登录</div>
+          <div class="wide-login-body">
+            <h3>安全员账号登录</h3>
+            <div class="wide-login-input"><img src="assets/svg/figma/wide-s1/user.svg" width="24" height="24" alt=""><span>工号 / 手机号</span></div>
+            <div class="wide-login-input"><img src="assets/svg/figma/wide-s1/lock-input.svg" width="24" height="24" alt=""><span>密码</span></div>
+            <div class="wide-login-submit">登录</div>
+          </div>
+        </div>
+        <p class="wide-login-status">检测中...</p>
+        <div class="flow-wide-progress"><span>点检进度</span><strong>1</strong><em>/ 8</em><div><b style="width:14.35%"></b></div></div>
+      </main>
+    </section>
+
+    <section class="screen operation-screen op-login-screen" id="operationS1Screen" data-width="1920" data-height="1080" aria-label="S1登录操作屏">
+      <div class="op-browser-bar"><img src="assets/svg/login-lock.svg" width="25" height="25" alt=""><span>sso.x-peng.com · 统一登录</span><b>内嵌网页登录</b></div>
+      <aside class="flow-op-sidebar js-flow-sidebar" data-current="s1"></aside>
+      <main class="op-login-stage">
+        <section class="op-login-brand"><div><img src="assets/svg/remote-car.svg" width="74" height="74" alt=""></div><h1>远程代驾</h1><p>安全员工作台 · 座舱开机点检</p></section>
+        <section class="op-login-card">
+          <h2>安全员账号登录</h2>
+          <div class="op-login-input"><img src="assets/svg/login-user.svg" width="30" height="30" alt=""><span>工号 / 手机号</span></div>
+          <div class="op-login-input"><img src="assets/svg/login-password.svg" width="30" height="30" alt=""><span>密码</span></div>
+          <div class="op-login-submit">登录</div>
+          <p>登录成功后自动继续点检</p>
+        </section>
+      </main>
+      <footer class="op-login-footer"><div><span class="done">✓</span>验证登录会话</div><div><span class="done">✓</span>获取用户信息</div><div><span class="current"></span>识别座舱设备</div><div class="muted"><span></span>云端鉴权</div><strong>正在校验登录状态…</strong></footer>
+    </section>
+
+    <section class="screen wide-screen flow-wide" id="wideS2Screen" data-width="5120" data-height="1440" aria-label="S2软件与双屏带鱼屏">
+      <header class="wide-v2-header">
+        <div class="wide-v2-title"><img src="assets/svg/wide-calendar-search.svg" width="48" height="48" alt=""><h1>远程代驾 · 座舱开机点检</h1><b>点检中 2/8</b></div>
+        <div class="wide-v2-info"><span><em>座舱</em>E12</span><i></i><span><em>设备</em>3C:58:C2:9F:1A:07</span><i></i><span><em>安全员</em>张伟 · XP88023</span><i></i><span>2026/11/09 23:17:51</span></div>
+      </header>
+      <aside class="flow-wide-sidebar js-flow-sidebar" data-current="s2">
+        <div class="flow-wide-row"><span>S1</span><strong>登录状态</strong><img src="assets/svg/wide-sidebar-complete.svg" width="36" height="36" alt="已完成"></div>
+        <div class="flow-wide-row current"><span>S2</span><strong>软件与双屏</strong><img src="assets/svg/wide-sidebar-current.svg" width="36" height="36" alt="进行中"></div>
+        <div class="flow-wide-row pending"><span>S3</span><strong>声音外放</strong><img src="assets/svg/wide-sidebar-pending.svg" width="36" height="36" alt="待点检"></div>
+        <div class="flow-wide-row"><span>H1</span><strong>操作套件连接</strong><img src="assets/svg/wide-sidebar-complete.svg" width="36" height="36" alt="已完成"></div>
+        <div class="flow-wide-row pending"><span>H2</span><strong>方向盘转向</strong><img src="assets/svg/wide-sidebar-pending.svg" width="36" height="36" alt="待点检"></div>
+        <div class="flow-wide-row pending"><span>H3</span><strong>方向盘按键与拨片</strong><img src="assets/svg/wide-sidebar-pending.svg" width="36" height="36" alt="待点检"></div>
+        <div class="flow-wide-row pending"><span>H4</span><strong>刹车与电门踏板</strong><img src="assets/svg/wide-sidebar-pending.svg" width="36" height="36" alt="待点检"></div>
+        <div class="flow-wide-row pending"><span>H5</span><strong>触控屏触摸</strong><img src="assets/svg/wide-sidebar-pending.svg" width="36" height="36" alt="待点检"></div>
+      </aside>
+      <main class="flow-wide-main">
+        <div class="flow-heading"><i></i><div><b>S2</b><span>软件与双屏</span></div><i></i></div>
+        <h2>正在检查软件运行和双屏显示</h2>
+        <div class="dual-wide-visual dual-monitor-visual" aria-label="座舱大屏与触控屏检测动画">
+          <div class="dual-monitor-item">
+            <div class="dual-monitor-screen is-wide" role="img" aria-label="座舱大屏">
+              <i class="dual-monitor-line dual-monitor-bar" aria-hidden="true"></i>
+              <i class="dual-monitor-line dual-monitor-mod" aria-hidden="true"></i>
+              <i class="dual-monitor-line dual-monitor-mod is-short" aria-hidden="true"></i>
+            </div>
+            <span class="dual-monitor-tag">座舱大屏</span>
+          </div>
+          <div class="dual-monitor-item">
+            <div class="dual-monitor-screen is-touch" role="img" aria-label="触控屏">
+              <i class="dual-monitor-line dual-monitor-bar" aria-hidden="true"></i>
+              <i class="dual-monitor-line dual-monitor-mod" aria-hidden="true"></i>
+              <i class="dual-monitor-line dual-monitor-mod is-short" aria-hidden="true"></i>
+            </div>
+            <span class="dual-monitor-tag">触控屏</span>
+          </div>
+        </div>
+        <div class="dual-wide-status"><div><i data-auto-index="0"></i><i data-auto-index="1"></i><i data-auto-index="2"></i><i data-auto-index="3"></i></div><strong>检测中…</strong></div>
+        <div class="flow-wide-progress"><span>点检进度</span><strong>2</strong><em>/ 8</em><div><b style="width:25%"></b></div></div>
+      </main>
+    </section>
+
+    <section class="screen operation-screen" id="operationS2Screen" data-width="1920" data-height="1080" aria-label="S2软件与双屏操作屏">
+      <header class="op-header"><div class="op-title"><span><img src="assets/svg/op-calendar-search.svg" width="46" height="46" alt=""></span><h1>开机点检</h1><b>点检中 2/8</b></div><div class="op-user"><span><em>安全员</em>张伟 · XP88023</span><i></i><span><em>座舱</em>E12</span></div></header>
+      <aside class="flow-op-sidebar js-flow-sidebar" data-current="s2">
+        <div class="flow-op-row done"><span>S1</span><strong>登录状态</strong><img src="assets/svg/op-complete.svg" width="24" height="24" alt="已完成"></div>
+        <div class="flow-op-row current"><span>S2</span><strong>软件与双屏</strong><img src="assets/svg/op-current.svg" width="24" height="24" alt="进行中"></div>
+        <div class="flow-op-row pending"><span>S3</span><strong>声音外放</strong><img src="assets/svg/op-pending.svg" width="24" height="24" alt="待点检"></div>
+        <div class="flow-op-row done"><span>H1</span><strong>操作套件连接</strong><img src="assets/svg/op-complete.svg" width="24" height="24" alt="已完成"></div>
+        <div class="flow-op-row pending"><span>H2</span><strong>方向盘转向</strong><img src="assets/svg/op-pending.svg" width="24" height="24" alt="待点检"></div>
+        <div class="flow-op-row pending"><span>H3</span><strong>方向盘按键与拨片</strong><img src="assets/svg/op-pending.svg" width="24" height="24" alt="待点检"></div>
+        <div class="flow-op-row pending"><span>H4</span><strong>刹车与电门踏板</strong><img src="assets/svg/op-pending.svg" width="24" height="24" alt="待点检"></div>
+        <div class="flow-op-row pending"><span>H5</span><strong>触控屏触摸</strong><img src="assets/svg/op-pending.svg" width="24" height="24" alt="待点检"></div>
+      </aside>
+      <main class="flow-op-main dual-op-main">
+        <div class="flow-op-heading"><i></i><div><b>S2</b><span>软件与双屏</span></div><i></i></div>
+        <div class="dual-op-visual dual-monitor-visual" aria-label="座舱大屏与触控屏检测动画">
+          <div class="dual-monitor-item">
+            <div class="dual-monitor-screen is-wide" role="img" aria-label="座舱大屏">
+              <i class="dual-monitor-line dual-monitor-bar" aria-hidden="true"></i>
+              <i class="dual-monitor-line dual-monitor-mod" aria-hidden="true"></i>
+              <i class="dual-monitor-line dual-monitor-mod is-short" aria-hidden="true"></i>
+            </div>
+            <span class="dual-monitor-tag">座舱大屏</span>
+          </div>
+          <div class="dual-monitor-item">
+            <div class="dual-monitor-screen is-touch" role="img" aria-label="触控屏">
+              <i class="dual-monitor-line dual-monitor-bar" aria-hidden="true"></i>
+              <i class="dual-monitor-line dual-monitor-mod" aria-hidden="true"></i>
+              <i class="dual-monitor-line dual-monitor-mod is-short" aria-hidden="true"></i>
+            </div>
+            <span class="dual-monitor-tag">触控屏</span>
+          </div>
+        </div>
+        <div class="dual-check-list">
+          <div class="dual-check-row" data-auto-index="0"><img src="assets/svg/op-current.svg" width="28" height="28" alt="检测中"><span>双窗口启动</span></div>
+          <div class="dual-check-row" data-auto-index="1"><img src="assets/svg/op-pending.svg" width="28" height="28" alt="待检测"><span>页面加载</span></div>
+          <div class="dual-check-row" data-auto-index="2"><img src="assets/svg/op-pending.svg" width="28" height="28" alt="待检测"><span>检测到 ≥2 台显示器</span></div>
+          <div class="dual-check-row" data-auto-index="3"><img src="assets/svg/op-pending.svg" width="28" height="28" alt="待检测"><span>分辨率满足基准</span></div>
+        </div>
+      </main>
+      <footer class="op-footer"><div><span class="inspection-footer-copy">点检中 · 请按屏幕提示操作</span></div><div><b class="inspection-footer-action"><img src="assets/images/figma/warning.png" width="24" height="24" alt="">跳过点检</b></div></footer>
+    </section>
+
+    <section class="screen wide-screen flow-wide figma-wide-s3" id="wideS3Screen" data-width="5120" data-height="1440" aria-label="S3声音外放带鱼屏">
+      <header class="wide-v2-header">
+        <div class="wide-v2-title"><img src="assets/svg/figma/op-s3/calendar-search.svg" width="48" height="48" alt=""><h1>远程代驾 · 座舱开机点检</h1><b>点检中 4/8</b></div>
+        <div class="wide-v2-info"><span><em>座舱</em>E12</span><i></i><span><em>设备</em>3C:58:C2:9F:1A:07</span><i></i><span><em>安全员</em>张伟 · XP88023</span><i></i><span>2026/11/09 22:17:55</span></div>
+      </header>
+      <aside class="flow-wide-sidebar js-flow-sidebar" data-current="s3">
+        <div class="flow-wide-row"><span>S1</span><strong>登录状态</strong><img src="assets/svg/wide-sidebar-complete.svg" width="36" height="36" alt="已完成"></div>
+        <div class="flow-wide-row"><span>S2</span><strong>软件与双屏</strong><img src="assets/svg/wide-sidebar-complete.svg" width="36" height="36" alt="已完成"></div>
+        <div class="flow-wide-row current"><span>S3</span><strong>声音外放</strong><img src="assets/svg/wide-sidebar-current.svg" width="36" height="36" alt="进行中"></div>
+        <div class="flow-wide-row pending"><span>H1</span><strong>操作套件连接</strong><img src="assets/svg/wide-sidebar-pending.svg" width="36" height="36" alt="待点检"></div>
+        <div class="flow-wide-row pending"><span>H2</span><strong>方向盘转向</strong><img src="assets/svg/wide-sidebar-pending.svg" width="36" height="36" alt="待点检"></div>
+        <div class="flow-wide-row pending"><span>H3</span><strong>方向盘按键与拨片</strong><img src="assets/svg/wide-sidebar-pending.svg" width="36" height="36" alt="待点检"></div>
+        <div class="flow-wide-row pending"><span>H4</span><strong>刹车与电门踏板</strong><img src="assets/svg/wide-sidebar-pending.svg" width="36" height="36" alt="待点检"></div>
+        <div class="flow-wide-row pending"><span>H5</span><strong>触控屏触摸</strong><img src="assets/svg/wide-sidebar-pending.svg" width="36" height="36" alt="待点检"></div>
+      </aside>
+      <main class="flow-wide-main">
+        <div class="flow-heading"><div><b>S3</b><span>声音外放</span></div></div>
+        <h2>听到提示音了吗？</h2>
+        <div class="wide-sound-visual"><svg viewBox="0 0 146.29 122.5" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="扬声器" class="s3-speaker" width="230" height="230"><g stroke="#FFD9A5" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"><path d="M12.7 82.6003H28.6797C30.7696 82.6003 32.7696 83.4498 34.2208 84.9537L57.209 108.778C62.0185 113.762 70.45 110.357 70.45 103.431V17.8767C70.45 11.1203 62.3695 7.63982 57.46 12.2816L34.1763 34.2955C32.7466 35.6472 30.8537 36.4003 28.8862 36.4003H12.7C8.44741 36.4003 5 39.8478 5 44.1003V74.9003C5 79.1529 8.44741 82.6003 12.7 82.6003Z"/><path class="speaker-wave-inner" d="M97.3945 32.5493C112.795 47.1793 112.795 71.8193 97.3945 86.4493"/><path class="speaker-wave-outer" d="M120.5 9.45068C148.22 37.1707 148.22 81.8307 120.5 109.551"/></g></svg><p><img src="assets/svg/tap-hand-gold.svg" width="38" height="38" alt="">请在操作屏点「可以听到」</p></div>
+        <div class="flow-wide-progress"><span>点检进度</span><strong>2</strong><em>/ 8</em><div><b style="width:25%"></b></div></div>
+      </main>
+    </section>
+
+    <section class="screen operation-screen figma-op-s3" id="operationS3Screen" data-width="1920" data-height="1080" aria-label="S3声音外放操作屏">
+      <header class="op-header"><div class="op-title"><span><img src="assets/svg/figma/op-s3/calendar-search.svg" width="46" height="46" alt=""></span><h1>开机点检</h1><b>点检中 4/8</b></div><div class="op-user"><span><em>安全员</em>张伟 · XP88023</span><i></i><span><em>座舱</em>E12</span></div></header>
+      <aside class="flow-op-sidebar js-flow-sidebar" data-current="s3">
+        <div class="flow-op-row done"><span>S1</span><strong>登录状态</strong><img src="assets/svg/op-complete.svg" width="24" height="24" alt="已完成"></div>
+        <div class="flow-op-row done"><span>S2</span><strong>软件与双屏</strong><img src="assets/svg/op-complete.svg" width="24" height="24" alt="已完成"></div>
+        <div class="flow-op-row current"><span>S3</span><strong>声音外放</strong><img src="assets/svg/op-current.svg" width="24" height="24" alt="进行中"></div>
+        <div class="flow-op-row pending"><span>H1</span><strong>操作套件连接</strong><img src="assets/svg/op-pending.svg" width="24" height="24" alt="待点检"></div>
+        <div class="flow-op-row pending"><span>H2</span><strong>方向盘转向</strong><img src="assets/svg/op-pending.svg" width="24" height="24" alt="待点检"></div>
+        <div class="flow-op-row pending"><span>H3</span><strong>方向盘按键与拨片</strong><img src="assets/svg/op-pending.svg" width="24" height="24" alt="待点检"></div>
+        <div class="flow-op-row pending"><span>H4</span><strong>刹车与电门踏板</strong><img src="assets/svg/op-pending.svg" width="24" height="24" alt="待点检"></div>
+        <div class="flow-op-row pending"><span>H5</span><strong>触控屏触摸</strong><img src="assets/svg/op-pending.svg" width="24" height="24" alt="待点检"></div>
+      </aside>
+      <main class="flow-op-main">
+        <div class="flow-op-heading"><div><b>S3</b><span>声音外放</span></div></div>
+        <h2>请问是否听到提示音？</h2>
+        <svg viewBox="0 0 146.29 122.5" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="扬声器" class="s3-speaker flow-op-speaker" width="168" height="168"><g stroke="#FFD9A5" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"><path d="M12.7 82.6003H28.6797C30.7696 82.6003 32.7696 83.4498 34.2208 84.9537L57.209 108.778C62.0185 113.762 70.45 110.357 70.45 103.431V17.8767C70.45 11.1203 62.3695 7.63982 57.46 12.2816L34.1763 34.2955C32.7466 35.6472 30.8537 36.4003 28.8862 36.4003H12.7C8.44741 36.4003 5 39.8478 5 44.1003V74.9003C5 79.1529 8.44741 82.6003 12.7 82.6003Z"/><path class="speaker-wave-inner" d="M97.3945 32.5493C112.795 47.1793 112.795 71.8193 97.3945 86.4493"/><path class="speaker-wave-outer" d="M120.5 9.45068C148.22 37.1707 148.22 81.8307 120.5 109.551"/></g></svg>
+        <div class="flow-op-actions"><div class="no">没听到</div><div class="yes">可以听到</div></div>
+        <p>声音由座舱扬声器外放</p>
+      </main>
+      <footer class="op-footer"><div><span class="inspection-footer-copy">点检中 · 请按屏幕提示操作</span></div><div><b class="inspection-footer-action"><img src="assets/images/figma/warning.png" width="24" height="24" alt="">跳过点检</b></div></footer>
+    </section>
+
+    <section class="screen wide-screen flow-wide" id="wideH1Screen" data-width="5120" data-height="1440" aria-label="H1操作套件连接带鱼屏">
+      <header class="wide-v2-header"><div class="wide-v2-title"><img src="assets/svg/figma/op-h1/header-inspection.svg" width="48" height="48" alt=""><h1>远程代驾 · 座舱开机点检</h1><b>点检中 4/8</b></div><div class="wide-v2-info"><span><em>座舱</em>E12</span><i></i><span><em>设备</em>3C:58:C2:9F:1A:07</span><i></i><span><em>安全员</em>张伟 · XP88023</span><i></i><span>2026/11/09 23:17:51</span></div></header>
+      <aside class="flow-wide-sidebar js-flow-sidebar" data-current="h1"></aside>
+      <main class="flow-wide-main inspection-main figma-wide-h1-main"><div class="flow-heading"><div><b>H1</b><span>操作套件连接</span></div></div><h2>正在确认操作套件连接</h2><div class="h1-wide-source"><div class="h1-wide-scanner"><img class="h1-scanner-base" src="assets/svg/figma/op-h1/scanner-base.svg" alt=""><div class="h1-scanner-rotor"><img class="h1-scanner-rings" src="assets/svg/figma/op-h1/scanner-rings.svg" alt=""></div><div class="h1-wide-node pedal" data-auto-index="0"><span><img src="assets/svg/figma/op-h1/device-pedal.svg" alt="脚踏板"></span><em>脚踏板</em></div><div class="h1-wide-node steering" data-auto-index="1"><span><img src="assets/svg/figma/op-h1/device-steering.svg" alt="方向盘"></span><em>方向盘</em></div><strong data-h1-status>检测中...</strong></div></div><div class="flow-wide-progress"><span>点检进度</span><strong>4</strong><em>/ 8</em><div><b style="width:50%"></b></div></div></main>
+    </section>
+
+    <section class="screen operation-screen" id="operationH1Screen" data-width="1920" data-height="1080" aria-label="H1操作套件连接操作屏">
+      <header class="op-header"><div class="op-title"><span><img src="assets/svg/figma/op-h1/header-inspection.svg" width="46" height="46" alt=""></span><h1>开机点检</h1><b>点检中 4/8</b></div><div class="op-user"><span><em>安全员</em>张伟 · XP88023</span><i></i><span><em>座舱</em>E12</span></div></header>
+      <aside class="flow-op-sidebar js-flow-sidebar" data-current="h1"></aside>
+      <main class="flow-op-main inspection-main figma-h1-main"><div class="flow-op-heading"><div><b>H1</b><span>操作套件连接</span></div></div><div class="h1-op-source" aria-label="操作套件连接检测"><img class="h1-scanner-base" src="assets/svg/figma/op-h1/scanner-base.svg" alt=""><div class="h1-scanner-rotor"><img class="h1-scanner-rings" src="assets/svg/figma/op-h1/scanner-rings.svg" alt=""></div><div class="h1-op-device pedal" data-auto-index="0"><span><img src="assets/svg/figma/op-h1/device-pedal.svg" alt="脚踏板"></span><em>脚踏板</em></div><div class="h1-op-device steering" data-auto-index="1"><span><img src="assets/svg/figma/op-h1/device-steering.svg" alt="方向盘"></span><em>方向盘</em></div><strong data-h1-status>检测中...</strong></div><div class="h1-check-list"><div class="h1-check-row" data-auto-index="0"><img data-status-icon src="assets/svg/figma/op-h1/status-current.svg" width="24" height="24" alt="检测中"><span>操作套件连接</span></div><div class="h1-check-row" data-auto-index="1"><img data-status-icon src="assets/svg/figma/op-h1/status-pending.svg" width="24" height="24" alt="待检测"><span>建立连接</span></div><div class="h1-check-row" data-auto-index="2"><img data-status-icon src="assets/svg/figma/op-h1/status-pending.svg" width="24" height="24" alt="待检测"><span>数据接收正常</span></div></div></main>
+      <footer class="op-footer"><div><span class="inspection-footer-copy">点检中 · 请按屏幕提示操作</span></div><div><b class="inspection-footer-action"><img src="assets/images/figma/warning.png" width="24" height="24" alt="">跳过点检</b></div></footer>
+    </section>
+
+    <section class="screen wide-screen flow-wide" id="wideH3Screen" data-width="5120" data-height="1440" aria-label="H3方向盘按键与拨片带鱼屏">
+      <header class="wide-v2-header"><div class="wide-v2-title"><img src="assets/svg/wide-calendar-search.svg" width="48" height="48" alt=""><h1>远程代驾 · 座舱开机点检</h1><b>点检中 6/8</b></div><div class="wide-v2-info"><span><em>座舱</em>E12</span><i></i><span><em>设备</em>3C:58:C2:9F:1A:07</span><i></i><span><em>安全员</em>张伟 · XP88023</span><i></i><span>2026/11/09 23:17:51</span></div></header>
+      <aside class="flow-wide-sidebar js-flow-sidebar" data-current="h3"></aside>
+      <main class="flow-wide-main inspection-main h3-wide-main"><div class="flow-heading"><div><b>H3</b><span>方向盘按键与拨片</span></div></div><h2>依次按下高亮的按键与拨片</h2><div class="key-wheel"><img src="assets/images/figma/steering-wheel-updated.png" width="656" height="685" alt="方向盘"><button class="key-target active" data-key-target="p" aria-label="按下 P 按键"><img data-key-target-image src="assets/svg/figma/h3-buttons/key-p.svg" alt=""><span data-key-target-text>P</span></button></div><div class="key-prompt"><div class="key-progress"><span data-key-kind>按键</span><strong data-key-progress>1</strong><em data-key-total>/ 8</em></div><div class="key-card"><b data-key-code>P</b><span data-key-name>挂P挡</span></div><p>点这里，或按方向盘上高亮的按键</p></div><div class="flow-wide-progress"><span>点检进度</span><strong>5</strong><em>/ 8</em><div><b style="width:14.35%"></b></div></div></main>
+    </section>
+
+    <section class="screen operation-screen" id="operationH3Screen" data-width="1920" data-height="1080" aria-label="H3方向盘按键与拨片操作屏">
+      <header class="op-header"><div class="op-title"><span><img src="assets/svg/op-calendar-search.svg" width="46" height="46" alt=""></span><h1>开机点检</h1><b>点检中 6/8</b></div><div class="op-user"><span><em>安全员</em>张伟 · XP88023</span><i></i><span><em>座舱</em>E12</span></div></header>
+      <aside class="flow-op-sidebar js-flow-sidebar" data-current="h3"></aside>
+      <main class="flow-op-main inspection-main h3-op-main"><div class="flow-op-heading"><div><b>H3</b><span>方向盘按键与拨片</span></div></div><div class="op-key-wheel"><img src="assets/images/figma/steering-wheel-updated.png" width="656" height="685" alt="方向盘"><button class="key-target active" data-key-target="p" aria-label="按下 P 按键"><img data-key-target-image src="assets/svg/figma/h3-buttons/key-p.svg" alt=""><span data-key-target-text>P</span></button></div><div class="op-key-prompt"><div class="key-progress"><span data-key-kind>按键</span><strong data-key-progress>1</strong><em data-key-total>/ 8</em></div><div class="key-card"><b data-key-code>P</b><span data-key-name>挂P挡</span></div><p>点这里，或按方向盘上高亮的按键</p></div></main>
+      <footer class="op-footer"><div><span class="inspection-footer-copy">点检中 · 请按屏幕提示操作</span></div><div><b class="inspection-footer-action"><img src="assets/images/figma/warning.png" width="24" height="24" alt="">跳过点检</b></div></footer>
+    </section>
+
+    <section class="screen wide-screen flow-wide" id="wideH4Screen" data-width="5120" data-height="1440" aria-label="H4刹车与电门踏板带鱼屏">
+      <header class="wide-v2-header"><div class="wide-v2-title"><img src="assets/svg/wide-calendar-search.svg" width="48" height="48" alt=""><h1>远程代驾 · 座舱开机点检</h1><b>点检中 6/8</b></div><div class="wide-v2-info"><span><em>座舱</em>E12</span><i></i><span><em>设备</em>3C:58:C2:9F:1A:07</span><i></i><span><em>安全员</em>张伟 · XP88023</span><i></i><span>2026/11/09 23:17:51</span></div></header>
+      <aside class="flow-wide-sidebar js-flow-sidebar" data-current="h4"></aside>
+      <main class="flow-wide-main inspection-main"><div class="flow-heading"><div><b>H4</b><span>刹车与电门踏板</span></div></div><h2>把刹车和电门踏板踩到底后松开</h2><div class="wide-pedals"><button class="pedal-card current" data-pedal="brake"><span>刹车</span><strong><em class="pedal-arrow" aria-hidden="true">↓</em><span data-value>0%</span></strong><i><b style="--pedal-value:0%"></b></i></button><button class="pedal-card" data-pedal="throttle"><span>电门</span><strong><em class="pedal-arrow" aria-hidden="true">↓</em><span data-value>0%</span></strong><i><b style="--pedal-value:0%"></b></i></button></div><div class="flow-wide-progress"><span>点检进度</span><strong>6</strong><em>/ 8</em><div><b style="width:75%"></b></div></div></main>
+    </section>
+
+    <section class="screen operation-screen" id="operationH4Screen" data-width="1920" data-height="1080" aria-label="H4刹车与电门踏板操作屏">
+      <header class="op-header"><div class="op-title"><span><img src="assets/svg/op-calendar-search.svg" width="46" height="46" alt=""></span><h1>开机点检</h1><b>点检中 6/8</b></div><div class="op-user"><span><em>安全员</em>张伟 · XP88023</span><i></i><span><em>座舱</em>E12</span></div></header>
+      <aside class="flow-op-sidebar js-flow-sidebar" data-current="h4"></aside>
+      <main class="flow-op-main inspection-main"><div class="flow-op-heading"><div><b>H4</b><span>刹车与电门踏板</span></div></div><div class="op-pedals"><button class="pedal-card current" data-pedal="brake"><span>刹车</span><strong><em class="pedal-arrow" aria-hidden="true">↓</em><span data-value>0%</span></strong><i><b style="--pedal-value:0%"></b></i></button><button class="pedal-card" data-pedal="throttle"><span>电门</span><strong><em class="pedal-arrow" aria-hidden="true">↓</em><span data-value>0%</span></strong><i><b style="--pedal-value:0%"></b></i></button></div></main>
+      <footer class="op-footer"><div><span class="inspection-footer-copy">点检中 · 请按屏幕提示操作</span></div><div><b class="inspection-footer-action"><img src="assets/images/figma/warning.png" width="24" height="24" alt="">跳过点检</b></div></footer>
+    </section>
+
+    <section class="screen wide-screen flow-wide" id="wideH5Screen" data-width="5120" data-height="1440" aria-label="H5触控屏触摸带鱼屏">
+      <header class="wide-v2-header"><div class="wide-v2-title"><img src="assets/svg/wide-calendar-search.svg" width="48" height="48" alt=""><h1>远程代驾 · 座舱开机点检</h1><b>点检中 7/8</b></div><div class="wide-v2-info"><span><em>座舱</em>E12</span><i></i><span><em>设备</em>3C:58:C2:9F:1A:07</span><i></i><span><em>安全员</em>张伟 · XP88023</span><i></i><span>2026/11/09 23:17:51</span></div></header>
+      <aside class="flow-wide-sidebar js-flow-sidebar" data-current="h5"></aside>
+      <main class="flow-wide-main inspection-main"><div class="flow-heading"><div><b>H5</b><span>触控屏触摸输入</span></div></div><h2>依次点按高亮的触摸区域（点中即通过）</h2><div class="wide-touch-board touch-board" data-touch-board><button data-index="1" class="active">1</button><button data-index="2" disabled>2</button><button data-index="3" disabled>3</button><button data-index="4" disabled>4</button><button data-index="5" disabled>5</button></div><div class="flow-wide-progress"><span>点检进度</span><strong>7</strong><em>/ 8</em><div><b style="width:87.5%"></b></div></div></main>
+    </section>
+
+    <section class="screen operation-screen" id="operationH5Screen" data-width="1920" data-height="1080" aria-label="H5触控屏触摸操作屏">
+      <header class="op-header"><div class="op-title"><span><img src="assets/svg/op-calendar-search.svg" width="46" height="46" alt=""></span><h1>开机点检</h1><b>点检中 7/8</b></div><div class="op-user"><span><em>安全员</em>张伟 · XP88023</span><i></i><span><em>座舱</em>E12</span></div></header>
+      <aside class="flow-op-sidebar js-flow-sidebar" data-current="h5"></aside>
+      <main class="flow-op-main inspection-main"><div class="flow-op-heading"><div><b>H5</b><span>触控屏触摸输入</span></div></div><div class="op-touch-board touch-board" data-touch-board><button data-index="1" class="active">1</button><button data-index="2" disabled>2</button><button data-index="3" disabled>3</button><button data-index="4" disabled>4</button><button data-index="5" disabled>5</button><p>已命中 <b data-hit-count>0</b>/5 区域</p></div></main>
+      <footer class="op-footer"><div><span class="inspection-footer-copy">点检中 · 请按屏幕提示操作</span></div><div><b class="inspection-footer-action"><img src="assets/images/figma/warning.png" width="24" height="24" alt="">跳过点检</b></div></footer>
+    </section>
+
+    <section class="screen wide-screen outcome-screen" id="wideReadyScreen" data-width="5120" data-height="1440" aria-label="带鱼屏待启动点检"><header class="wide-v2-header"><div class="wide-v2-title"><img src="assets/svg/wide-calendar-search.svg" width="48" height="48" alt=""><h1>远程代驾 · 座舱开机点检</h1><b>待启动点检</b></div><div class="wide-v2-info"><span><em>座舱</em>E12</span><i></i><span><em>设备</em>3C:58:C2:9F:1A:07</span><i></i><span><em>安全员</em>张伟 · XP88023</span></div></header><main><img class="outcome-ready-icon" src="assets/svg/wide-calendar-search.svg" width="128" height="128" alt="开机点检"><h2>座舱开机点检</h2><p>请在操作屏点「开始一键点检」</p><span>软件自动检测 · 硬件按提示操作</span></main></section>
+    <section class="screen operation-screen outcome-screen ready-screen ready-figma" id="operationReadyScreen" data-width="1920" data-height="1080" aria-label="操作屏待启动点检">
+      <header class="ready-header">
+        <div class="ready-brand"><img src="assets/svg/figma/ready/calendar-search.svg" width="46" height="46" alt=""><h1>开机点检</h1><b>待启动点检</b></div>
+        <div class="ready-user"><span><em>安全员</em>张伟 · XP88023</span><i></i><span><em>座舱</em>E12</span></div>
+      </header>
+      <main class="ready-main">
+        <div class="ready-intro"><h2>座舱开机点检</h2><p>软件自动检查・硬件逐步引导・共 8 项约 1 分钟</p></div>
+        <div class="ready-task-grid">
+          <div class="ready-task"><span class="ready-icon"><img class="ready-icon-bg" src="assets/svg/figma/ready/icon-bg.svg" width="44" height="44" alt=""><img src="assets/svg/figma/ready/user.svg" width="24" height="24" alt=""></span><strong>登录状态</strong><em class="automatic">自动</em></div>
+          <div class="ready-task"><span class="ready-icon"><img src="assets/svg/figma/ready/dual-screen.svg" width="44" height="44" alt=""></span><strong>软件与双屏</strong><em class="automatic">自动</em></div>
+          <div class="ready-task"><span class="ready-icon"><img class="ready-icon-bg" src="assets/svg/figma/ready/icon-bg.svg" width="44" height="44" alt=""><img src="assets/svg/figma/ready/speaker.svg" width="24" height="24" alt=""></span><strong>声音外放</strong><em>需操作</em></div>
+          <div class="ready-task"><span class="ready-icon"><img src="assets/svg/figma/ready/device-link.svg" width="44" height="44" alt=""></span><strong>操作套件连接</strong><em class="automatic">自动</em></div>
+          <div class="ready-task"><span class="ready-icon"><img src="assets/svg/figma/ready/steering-turn.svg" width="44" height="44" alt=""></span><strong>方向盘转向</strong><em>需操作</em></div>
+          <div class="ready-task"><span class="ready-icon"><img src="assets/svg/figma/ready/steering-buttons.svg" width="44" height="44" alt=""></span><strong>方向盘按键与拨片</strong><em>需操作</em></div>
+          <div class="ready-task"><span class="ready-icon"><img src="assets/svg/figma/ready/pedal.svg" width="44" height="44" alt=""></span><strong>刹车与电门踏板</strong><em>需操作</em></div>
+          <div class="ready-task"><span class="ready-icon"><img src="assets/svg/figma/ready/touch.svg" width="44" height="44" alt=""></span><strong>触控屏触摸</strong><em>需操作</em></div>
+        </div>
+        <div class="ready-actions"><button data-start-inspection>开始点检</button><a href="#" data-skip-inspection>跳过点检，直接进入系统</a></div>
+      </main>
+    </section>
+    <section class="screen wide-screen outcome-screen result-screen result-pass figma-wide-pass" id="widePassScreen" data-width="5120" data-height="1440" aria-label="带鱼屏点检通过"><header class="wide-v2-header"><div class="wide-v2-title"><img src="assets/svg/figma/pass-wide/calendar-search.svg" width="48" height="48" alt=""><h1>远程代驾 · 座舱开机点检</h1><b class="pass-badge">点检完成</b></div><div class="wide-v2-info"><span><em>座舱</em>E12</span><i></i><span><em>设备</em>3C:58:C2:9F:1A:07</span><i></i><span><em>安全员</em>张伟 · XP88023</span><i></i><span>2026/10/28 12:04:53</span></div></header><aside class="result-wide-sidebar" data-result-sidebar="pass"></aside><main class="result-wide-main"><div class="wide-pass-summary"><img class="result-hero-icon" src="assets/svg/figma/pass-wide/pass-hero.svg" width="200" height="200" alt="点检通过"><div class="wide-pass-copy"><h2>点检完成・全部正常</h2><p>请在触控屏处理后重新检测</p></div><div class="result-count"><strong>8</strong><span>项通过</span><img src="assets/svg/figma/pass-wide/count-divider.svg" width="1" height="49" alt=""><strong>0</strong><span>项待留意</span></div></div></main></section>
+    <section class="screen operation-screen outcome-screen result-screen result-pass figma-op-pass" id="operationPassScreen" data-width="1920" data-height="1080" aria-label="操作屏点检通过"><header class="op-header"><div class="op-title"><span><img src="assets/svg/figma/pass-operation/calendar-search.svg" width="46" height="46" alt=""></span><h1>开机点检</h1><b class="pass-badge">点检未通过</b></div><div class="op-user"><span><em>安全员</em>张伟 · XP88023</span><i></i><span><em>座舱</em>E12</span></div></header><main class="result-op-main"><div class="result-op-summary"><span><img class="result-mini-icon" src="assets/svg/figma/pass-operation/pass-summary.svg" width="60" height="60" alt="点检通过"></span><div><h2>点检完成 · 全部正常</h2><p>8/8 项通过 · 可以进入系统</p></div></div><div class="result-table" data-result-list="pass"></div><div class="result-actions pass-actions"><button data-enter-system>进入系统</button></div></main><footer class="op-footer"><div><span class="inspection-footer-copy">点检中 · 请按屏幕提示操作</span></div><div><b class="inspection-footer-action"><img src="assets/images/figma/warning.png" width="24" height="24" alt="">跳过点检</b></div></footer></section>
+    <section class="screen wide-screen outcome-screen result-screen result-fail figma-wide-fail" id="wideFailScreen" data-width="5120" data-height="1440" aria-label="带鱼屏点检未通过"><header class="wide-v2-header"><div class="wide-v2-title"><img src="assets/svg/figma/fail-wide/calendar-search.svg" width="48" height="48" alt=""><h1>远程代驾 · 座舱开机点检</h1><b class="fail-badge">点检未通过</b></div><div class="wide-v2-info"><span><em>座舱</em>E12</span><i></i><span><em>设备</em>3C:58:C2:9F:1A:07</span><i></i><span><em>安全员</em>张伟 · XP88023</span><i></i><span>2026/10/28 12:04:53</span></div></header><aside class="result-wide-sidebar" data-result-sidebar="fail"></aside><main class="result-wide-main"><div class="wide-fail-summary"><img class="result-hero-icon" src="assets/svg/figma/fail-wide/fail-hero.svg" width="200" height="200" alt="点检失败"><div class="wide-fail-copy"><h2>点检未通过・1 项需要修复</h2><p>请在触控屏处理后重新检测</p></div><div class="result-count"><strong data-result-passed>7</strong><span>项通过</span><img src="assets/svg/figma/fail-wide/count-divider.svg" width="1" height="49" alt=""><strong class="attention" data-result-attention>1</strong><span>项待留意</span></div></div></main></section>
+    <section class="screen operation-screen outcome-screen result-screen result-fail figma-op-fail" id="operationFailScreen" data-width="1920" data-height="1080" aria-label="操作屏点检未通过"><header class="op-header"><div class="op-title"><span><img src="assets/svg/figma/fail-operation/calendar-search.svg" width="46" height="46" alt=""></span><h1>开机点检</h1><b class="fail-badge">点检未通过</b></div><div class="op-user"><span><em>安全员</em>张伟 · XP88023</span><i></i><span><em>座舱</em>E12</span></div></header><main class="result-op-main"><div class="result-op-summary"><span><img class="result-mini-icon" src="assets/svg/figma/fail-operation/fail-summary.svg" width="60" height="60" alt="点检失败"></span><div><h2>点检未通过 · 1 项需要修复</h2><p>修复后点「重新检测问题项」，其余项目已通过</p></div></div><div class="result-table" data-result-list="fail"></div><div class="result-actions"><button class="secondary" data-start-inspection>全部重新检测</button><button data-restart-inspection>重新检测问题项</button><button class="disabled" disabled>进入系统</button></div></main><footer class="op-footer"><div><span class="inspection-footer-copy">点检中 · 请按屏幕提示操作</span></div><div><b class="inspection-footer-action"><img src="assets/images/figma/warning.png" width="24" height="24" alt="">跳过点检</b></div></footer></section>
+    <section class="screen wide-screen outcome-screen" id="wideEnteredScreen" data-width="5120" data-height="1440" aria-label="带鱼屏已进入系统"><header class="wide-v2-header"><div class="wide-v2-title"><img src="assets/svg/wide-calendar-search.svg" width="48" height="48" alt=""><h1>远程代驾 · 座舱开机点检</h1><b>已完成点检</b></div><div class="wide-v2-info"><span><em>座舱</em>E12</span><i></i><span><em>安全员</em>张伟 · XP88023</span></div></header><main><div class="outcome-icon success">✓</div><h2>已进入远程代驾系统</h2><p>开机点检流程已结束</p></main></section>
+    <section class="screen operation-screen outcome-screen" id="operationEnteredScreen" data-width="1920" data-height="1080" aria-label="操作屏已进入系统"><header class="op-header"><div class="op-title"><span><img src="assets/svg/op-calendar-search.svg" width="46" height="46" alt=""></span><h1>开机点检</h1><b>已完成点检</b></div><div class="op-user"><span><em>安全员</em>张伟 · XP88023</span><i></i><span><em>座舱</em>E12</span></div></header><main><div class="outcome-icon success">✓</div><h2>已进入远程代驾系统</h2><p>当前为本地交互原型确认态</p><button data-return-ready>返回就绪页</button></main></section>
+
+    <div class="skip-dialog" id="skipDialog" hidden role="dialog" aria-modal="true" aria-labelledby="skipDialogTitle">
+      <div class="skip-dialog-card">
+        <img class="skip-dialog-icon" src="assets/svg/figma/skip-dialog-warning.svg" width="99" height="99" alt="警告">
+        <h2 id="skipDialogTitle">跳过点检，直接进入系统?</h2>
+        <div class="skip-risks">
+          <p><img src="assets/svg/figma/skip-dialog-bullet.svg" width="7" height="7" alt="">没通过点检的设备可能无法正常工作</p>
+          <p><img src="assets/svg/figma/skip-dialog-bullet.svg" width="7" height="7" alt="">本次跳过会被记录并上报后台</p>
+        </div>
+        <div class="skip-dialog-actions"><button data-skip-cancel>取消</button><button data-skip-confirm>确定跳过</button></div>
+        <small>点击即代表你已知晓并接受上述风险</small>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js?v=figma-section-40-3856"></script>
+</body>
+</html>
