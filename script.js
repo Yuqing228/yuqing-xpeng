@@ -45,12 +45,12 @@ const failureDetails = {
 let keySequence = [
   { code: 'P', name: '挂P挡', x: 63.2, y: 43.1, size: 86, asset: 'key-p.svg' },
   { code: 'PL', name: '驻车灯', x: 36.68, y: 43.68, size: 86, asset: 'key-pl.svg' },
-  { code: 'A', name: '左转向灯', x: 71.7, y: 56.5, size: 46 },
-  { code: 'B', name: '右转向灯', x: 76.7, y: 52, size: 46 },
-  { code: 'Y', name: '鸣笛', x: 71.7, y: 47.5, size: 46 },
+  { code: 'A', name: '左转向灯', x: 71.7, y: 56.5, size: 69 },
+  { code: 'B', name: '右转向灯', x: 76.7, y: 52, size: 69 },
+  { code: 'Y', name: '鸣笛', x: 71.7, y: 47.5, size: 69 },
   { code: 'N', name: '问题打点', x: 37.5, y: 43.1, size: 86, asset: 'key-n.svg' },
-  { code: 'RADIO', name: '紧急停车', x: 34.2, y: 68.8, size: 86, asset: 'key-radio.svg' },
-  { code: 'START', name: '接管确认', x: 66.5, y: 68.8, size: 86, asset: 'key-start.svg' },
+  { code: 'RADIO', name: '紧急停车', x: 34.2, y: 68.8, size: 129, asset: 'key-radio.svg' },
+  { code: 'START', name: '接管确认', x: 66.5, y: 68.8, size: 129, asset: 'key-start.svg' },
   { code: 'R', name: '左拨片', x: 17.5, y: 37, size: 86, asset: 'key-r.svg' },
   { code: 'D', name: '右拨片', x: 82.5, y: 37, size: 86, asset: 'key-d.svg' }
 ];
@@ -494,23 +494,28 @@ function updateKeyTargets() {
     const image = button.querySelector('[data-key-target-image]');
     const text = button.querySelector('[data-key-target-text]');
     button.dataset.keyCode = current?.code || '';
+    button.classList.toggle('square-key', ['□', '○', '↵'].includes(current?.code));
+    button.classList.toggle('rounded-square-key', current?.code === '□');
     button.setAttribute('aria-label', current ? `按下 ${current.code} 按键` : '按键检测完成');
     button.classList.toggle('active', Boolean(current));
+    button.hidden = !current;
     button.classList.toggle('has-cutout', Boolean(current?.asset));
     button.classList.toggle('fallback-key', Boolean(current && !current.asset));
     button.style.setProperty('--target-x', `${current?.x ?? 50}%`);
     button.style.setProperty('--target-y', `${current?.y ?? 50}%`);
-    button.style.setProperty('--target-size', `${current?.size ?? 64}px`);
+    button.style.setProperty('--target-size', `${current?.size ?? 128}px`);
     if (image) {
       image.hidden = !current?.asset;
       if (current?.asset) image.src = `assets/svg/figma/h3-buttons/${current.asset}`;
     }
     if (text) {
       text.hidden = Boolean(current?.asset);
-      text.textContent = current?.code || '✓';
+      text.textContent = current?.code === '□' ? '' : current?.code || '';
+      text.classList.toggle('key-complete-mark', !current);
     }
   });
   document.querySelectorAll('.key-prompt,.op-key-prompt').forEach(prompt => {
+    prompt.querySelector('.key-progress').hidden = !current;
     const kind = prompt.querySelector('[data-key-kind]');
     const progress = prompt.querySelector('[data-key-progress]');
     const total = prompt.querySelector('[data-key-total]');
@@ -518,9 +523,13 @@ function updateKeyTargets() {
     const name = prompt.querySelector('[data-key-name]');
     const isPaddle = wheelVariant === '1' && keyIndex >= 8 && keyIndex < keySequence.length;
     if (kind) kind.textContent = current ? (isPaddle ? '拨片' : '按键') : '检测';
-    if (progress) progress.textContent = current ? String(isPaddle ? keyIndex - 7 : keyIndex + 1) : '✓';
+    if (progress) progress.textContent = current ? String(isPaddle ? keyIndex - 7 : keyIndex + 1) : '';
+    if (progress) progress.classList.toggle('key-complete-mark', !current);
     if (total) total.textContent = current ? (isPaddle ? '/ 2' : wheelVariant === '2' ? '/ 7' : '/ 8') : '完成';
-    if (code) code.textContent = current?.code || '✓';
+    if (code) code.textContent = current?.code === '□' ? '' : current?.code || '';
+    if (code) code.classList.toggle('key-complete-mark', !current);
+    if (code) code.classList.toggle('square-key', ['□', '○', '↵'].includes(current?.code));
+    if (code) code.classList.toggle('rounded-square-key', current?.code === '□');
     if (name) name.textContent = current?.name || '检测完成';
   });
 }
