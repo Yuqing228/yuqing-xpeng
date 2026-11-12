@@ -1,7 +1,69 @@
 const viewport = document.getElementById('viewport');
+// Embed skip-warning artwork so footer and dialog icons never depend on a copied asset.
+const skipWarningSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 184" fill="none"><path d="M87 24Q100 2 113 24L188 154Q200 176 175 176H25Q0 176 12 154Z" stroke="#f4d09f" stroke-width="15" stroke-linejoin="round"/><path d="M100 69V108" stroke="#f4d09f" stroke-width="14" stroke-linecap="round"/><circle cx="100" cy="132" r="8" fill="#f4d09f"/></svg>';
+document.querySelectorAll('.inspection-footer-action img,.skip-dialog-icon').forEach(icon => {
+  icon.src = `data:image/svg+xml,${encodeURIComponent(skipWarningSvg)}`;
+});
 const scaleLabel = document.getElementById('scaleLabel');
 const buttons = [...document.querySelectorAll('.mode-button')];
 const stepButtons = [...document.querySelectorAll('.step-button')];
+const warningButton = document.createElement('button');
+warningButton.dataset.demo = 'warning';
+warningButton.textContent = '警告结果';
+document.querySelector('[data-demo="fail"]').after(warningButton);
+const warningIcon = 'assets/svg/warning-result.svg';
+for (const [sourceId, targetId] of [['widePassScreen', 'wideWarningScreen'], ['operationPassScreen', 'operationWarningScreen']]) {
+  const screen = document.getElementById(sourceId).cloneNode(true);
+  screen.id = targetId;
+  screen.classList.remove('active');
+  screen.classList.add('result-warning');
+  screen.setAttribute('aria-label', '点检完成 · 1 项请留意');
+  screen.querySelector('header b').textContent = '点检警告';
+  screen.querySelector('main h2').textContent = '点检完成 · 1 项请留意';
+  screen.querySelector('.result-hero-icon,.result-mini-icon').src = warningIcon;
+  const copy = screen.querySelector('.wide-pass-copy,.result-op-summary>div');
+  let description = copy.querySelector('p');
+  if (!description) { description = document.createElement('p'); copy.append(description); }
+  description.textContent = '不影响进入系统，可稍后处理';
+  if (sourceId === 'widePassScreen') description.remove();
+  const count = screen.querySelector('.result-count');
+  if (count) { count.querySelectorAll('strong')[0].textContent = '7'; count.querySelectorAll('strong')[1].textContent = '1'; }
+  const list = screen.querySelector('[data-result-list]');
+  if (list) list.dataset.resultList = 'warning';
+  const sidebar = screen.querySelector('[data-result-sidebar]');
+  if (sidebar) sidebar.dataset.resultSidebar = 'warning';
+  const actions = screen.querySelector('.result-actions');
+  if (actions) {
+    const retry = document.createElement('button');
+    retry.dataset.retryWarning = '';
+    retry.textContent = '重新检测问题项';
+    actions.prepend(retry);
+    const note = document.createElement('p');
+    note.className = 'warning-note';
+    note.textContent = '1 项已记为待跟进，不影响进入系统';
+    actions.after(note);
+  }
+  document.getElementById(sourceId).after(screen);
+}
+const monitorButton = document.createElement('button');
+monitorButton.dataset.demo = 'monitor';
+monitorButton.textContent = '监控状态';
+warningButton.after(monitorButton);
+for (const [sourceId, targetId, wide] of [['widePassScreen', 'wideMonitorScreen', true], ['operationEnteredScreen', 'operationMonitorScreen', false]]) {
+  const screen = document.getElementById(sourceId).cloneNode(true);
+  screen.id = targetId;
+  screen.classList.remove('active');
+  screen.classList.add('monitor-screen');
+  screen.setAttribute('aria-label', '系统已进入监控模式');
+  const badge = screen.querySelector('header b');
+  badge.classList.remove('pass-badge', 'fail-badge');
+  badge.textContent = '已进入监控模式';
+  const main = screen.querySelector('main');
+  const cameraSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" fill="none" stroke="#f4d09f" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><circle cx="120" cy="91" r="83"/><circle cx="120" cy="91" r="33"/><path d="M96 172 78 229M144 172l18 57M54 229h132"/></svg>';
+  main.innerHTML = `<div class="monitor-content${wide ? ' wide-pass-summary' : ''}"><img src="data:image/svg+xml,${encodeURIComponent(cameraSvg)}" alt="监控" width="200" height="200"><div class="${wide ? 'wide-pass-copy' : 'monitor-copy'}"><h2>系统已进入监控模式</h2><p>点检完成，等待调度任务下发</p></div></div>`;
+  if (wide) screen.querySelector('[data-result-sidebar]').dataset.resultSidebar = 'monitor';
+  document.getElementById(sourceId).after(screen);
+}
 const demoButtons = [...document.querySelectorAll('[data-demo]')];
 const failureSelect = document.getElementById('failureSelect');
 const widePreviewFrame = document.getElementById('widePreviewFrame');
@@ -19,6 +81,8 @@ const screens = {
   ready: { wide: document.getElementById('wideReadyScreen'), operation: document.getElementById('operationReadyScreen') },
   pass: { wide: document.getElementById('widePassScreen'), operation: document.getElementById('operationPassScreen') },
   fail: { wide: document.getElementById('wideFailScreen'), operation: document.getElementById('operationFailScreen') },
+  warning: { wide: document.getElementById('wideWarningScreen'), operation: document.getElementById('operationWarningScreen') },
+  monitor: { wide: document.getElementById('wideMonitorScreen'), operation: document.getElementById('operationMonitorScreen') },
   entered: { wide: document.getElementById('wideEnteredScreen'), operation: document.getElementById('operationEnteredScreen') }
 };
 
@@ -87,6 +151,7 @@ function switchWheel(variant) {
   });
   updateKeyTargets();
   updateSteeringUI();
+  if (step === 'h2') startSteeringSequence();
 }
 
 let viewMode = 'dual';
@@ -98,6 +163,8 @@ let keyIndex = 0;
 let pedalStage = 0;
 let pedalPress = null;
 let steeringStage = 0;
+let steeringMotionToken = 0;
+let dampingResult = null;
 let steeringAngle = 0;
 let steeringMaxLeft = 0;
 let steeringMaxRight = 0;
@@ -273,7 +340,6 @@ function setMotionPaused(paused) {
     playTimer = 0;
   } else {
     motionTimers.forEach(timer => timer.arm());
-    if (document.querySelector('[data-demo="play"]')?.classList.contains('active')) schedulePlayback();
   }
 }
 
@@ -316,6 +382,7 @@ function startAutoSequence(stepName, total) {
     doneCount += 1;
     updateAutoSequence(stepName, doneCount, total);
     if (doneCount < total) scheduleMotion(advance, 380);
+    else completeInspectionStep(stepName);
   };
   scheduleMotion(advance, 320);
 }
@@ -370,10 +437,11 @@ function setStep(nextStep) {
     button.setAttribute('aria-pressed', String(active));
     if (active) button.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   });
+  if (step === 's1') scheduleMotion(() => completeInspectionStep('s1'), 800);
   if (step === 's2') startAutoSequence('s2', 4);
   if (step === 's3') startSoundPreview();
   if (step === 'h1') startAutoSequence('h1', 3);
-  if (step === 'h2') updateSteeringUI();
+  if (step === 'h2') { updateSteeringUI(); startSteeringSequence(); }
   if (step === 'h3') updateKeyTargets();
   if (step === 'h4') resetPedals();
   if (step === 'h5') resetTouchTargets();
@@ -382,12 +450,30 @@ function setStep(nextStep) {
 }
 
 function setDemoState(name) {
+  document.querySelectorAll('[data-wheel]').forEach(button => {
+    button.classList.remove('active');
+    button.setAttribute('aria-pressed', 'false');
+  });
   demoButtons.forEach(button => button.classList.toggle('active', button.dataset.demo === name));
+  demoButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.demo === name)));
 }
 
 function stopPlayback() {
   window.clearTimeout(playTimer);
   playTimer = 0;
+}
+
+function completeInspectionStep(completedStep) {
+  if (step !== completedStep) return;
+  stopPlayback();
+  scheduleMotion(() => {
+    if (step !== completedStep) return;
+    const index = inspectionSteps.findIndex(([id]) => id === completedStep);
+    if (index === inspectionSteps.length - 1) return finishPlayback();
+    const next = inspectionSteps[index + 1][0];
+    playIndex = index + 2;
+    setStep(next);
+  }, 400);
 }
 
 function playbackDelay() {
@@ -403,7 +489,7 @@ function schedulePlayback() {
 
 function finishPlayback() {
   const selectedFailure = failureSelect.value;
-  const result = selectedFailure === 'none' ? 'pass' : 'fail';
+  const result = selectedFailure === 'none' ? 'pass' : selectedFailure === 's3' ? 'warning' : 'fail';
   updateFailureMessage();
   setStep(result);
   setDemoState(result);
@@ -415,8 +501,7 @@ function advancePlayback() {
   setStep(inspectionSteps[playIndex][0]);
   playIndex += 1;
   setDemoState('play');
-  if (step === 'h2') return;
-  schedulePlayback();
+  // Each step advances only from its own completion event.
 }
 
 function startPlayback() {
@@ -446,7 +531,7 @@ function renderResultLists() {
       const buildWideRows = (steps, passIcon) => steps.map(([key, code, label]) => {
         const failed = key === failedStep;
         const icon = failed ? 'assets/svg/figma/fail-wide/fail-status.svg' : passIcon;
-        return `<div class="result-side-row${failed ? ' fail' : ''}"><span>${code}</span><strong>${label}</strong><img src="${icon}" width="36" height="36" alt="${failed ? '需修复' : '通过'}"></div>`;
+        return `<div class="result-side-row${failed ? ' fail' : ''}"><span>${code}</span><strong>${label}</strong><img src="${icon}" width="36" height="36" alt="${failed ? '待修复' : '通过'}"></div>`;
       }).join('');
       sidebar.innerHTML = `<section class="result-wide-group result-wide-software"><div class="result-wide-group-title"><img src="assets/svg/figma/wide-s1/software.svg" width="66" height="66" alt=""><h2>软件点检</h2></div><div class="result-wide-list">${buildWideRows(inspectionSteps.slice(0, 3), 'assets/svg/figma/fail-wide/complete.svg')}</div></section><img class="result-wide-divider" src="assets/svg/figma/fail-wide/sidebar-divider.svg" width="1296" height="2" alt=""><section class="result-wide-group result-wide-hardware"><div class="result-wide-group-title"><img src="assets/svg/figma/wide-s1/hardware.svg" width="66" height="66" alt=""><h2>硬件点检</h2></div><div class="result-wide-list">${buildWideRows(inspectionSteps.slice(3), 'assets/svg/figma/fail-wide/complete-alt.svg')}</div></section>`;
       return;
@@ -461,9 +546,20 @@ function renderResultLists() {
       const note = failed ? `<small>${detail}</small>` : '';
       const exactFailAsset = failed ? 'assets/svg/figma/fail-operation/fail-status.svg' : (key === 'h5' ? 'assets/svg/figma/fail-operation/pass-status-large.svg' : 'assets/svg/figma/fail-operation/pass-status.svg');
       const icon = failing ? exactFailAsset : 'assets/svg/figma/pass-operation/pass-status.svg';
-      return `<div class="result-row${failed ? ' fail' : ''}"><span>${code}</span><strong>${label}${note}</strong><em>${resultMethods[key]}</em><b>${failed ? '需修复' : '通过'}</b><img src="${icon}" width="24" height="24" alt="${failed ? '需修复' : '通过'}"></div>`;
+      return `<div class="result-row${failed ? ' fail' : ''}"><span>${code}</span><strong>${label}${note}</strong><em>${resultMethods[key]}</em><b>${failed ? '待修复' : '通过'}</b><img src="${icon}" width="24" height="24" alt="${failed ? '待修复' : '通过'}"></div>`;
     }).join('');
   });
+  const warningList = document.querySelector('[data-result-list="warning"]');
+  const warningRow = warningList?.children[2];
+  if (warningRow) {
+    warningRow.classList.add('warning-row');
+    warningRow.querySelector('strong').innerHTML = '声音外放<small>未听到提示音，请检查扬声器音量或联系运维</small>';
+    warningRow.querySelector('b').textContent = '待跟进';
+    warningRow.querySelector('img').src = warningIcon;
+    warningRow.querySelector('img').alt = '待跟进';
+  }
+  const wideWarningRow = document.querySelector('[data-result-sidebar="warning"] .result-wide-software .result-side-row:nth-child(3)');
+  if (wideWarningRow) { wideWarningRow.classList.add('warning-row'); wideWarningRow.querySelector('img').src = warningIcon; wideWarningRow.querySelector('img').alt = '待跟进'; }
 }
 
 function resetTouchTargets() { touchHit = 0; updateTouchBoards(); }
@@ -484,6 +580,7 @@ function hitTouchTarget(index) {
   if (index !== touchHit || touchHit >= 5) return;
   touchHit += 1;
   updateTouchBoards();
+  if (touchHit === 5) completeInspectionStep('h5');
 }
 
 function resetKeyTargets() { keyIndex = 0; updateKeyTargets(); }
@@ -538,6 +635,12 @@ function hitKeyTarget(key) {
   const current = keySequence[keyIndex];
   if (!current || key.toUpperCase() !== current.code) return false;
   keyIndex += 1;
+  if (keyIndex >= keySequence.length && step === 'h3') {
+    stopPlayback();
+    playIndex = inspectionSteps.findIndex(([id]) => id === 'h4') + 1;
+    setStep('h4');
+    return true;
+  }
   updateKeyTargets();
   return true;
 }
@@ -574,7 +677,9 @@ function formatSteeringAngle(value) {
 }
 
 function resetSteeringInspection() {
-  steeringStage = 0;
+  steeringMotionToken += 1;
+  dampingResult = null;
+  steeringStage = wheelVariant === '1' ? 1 : 0;
   steeringAngle = 0;
   steeringMaxLeft = 0;
   steeringMaxRight = 0;
@@ -616,17 +721,20 @@ function updateSteeringUI() {
   const arcProgress = Math.max(0, Math.min(1, (visualAngle + 75) / 150));
   const angleText = formatSteeringAngle(steeringAngle);
   const maxText = `最大左 ${Math.round(steeringMaxLeft)}° / 右 ${Math.round(steeringMaxRight)}°`;
-  let status = '请转动方向盘，开始检测';
+  let status = '方向盘自动转动中，请勿操作';
   if (steeringStage === 1) {
     if (steeringHitLeft && !steeringHitRight) status = '左侧已打死，请向右打死';
     else if (!steeringHitLeft && steeringHitRight) status = '右侧已打死，请向左打死';
     else status = '拖动方向盘，左右打死';
   }
-  if (steeringStage === 2) status = Math.abs(steeringAngle) <= 8 ? '请确认方向盘阻尼' : '请将方向盘回正';
+  if (steeringStage === 2) status = Math.abs(steeringAngle) <= 5 ? '回正完成，请确认阻尼' : '自动回正中';
+  if (steeringStage === 1.5) status = '左右打死已完成';
   if (steeringCompleted) status = '方向盘转向点检完成';
   if (document.body.classList.contains('steering-damping-error')) status = '阻尼异常，请检查后重新确认';
 
   document.querySelectorAll('[data-steering-wheel]').forEach(wheel => {
+    wheel.setAttribute('aria-valuemin', '-470');
+    wheel.setAttribute('aria-valuemax', '470');
     wheel.style.transform = `rotate(${steeringAngle}deg)`;
     wheel.setAttribute('aria-valuenow', String(Math.round(steeringAngle)));
     wheel.setAttribute('aria-valuetext', angleText);
@@ -634,16 +742,66 @@ function updateSteeringUI() {
   document.querySelectorAll('.steering-dynamic-gauge').forEach(gauge => updateSteeringGauge(gauge, arcProgress));
   document.querySelectorAll('[data-steering-angle]').forEach(node => { node.textContent = angleText; });
   document.querySelectorAll('[data-steering-maximum]').forEach(node => { node.textContent = maxText; });
-  document.querySelectorAll('[data-steering-status]').forEach(node => { node.textContent = status; });
+  document.querySelectorAll('[data-steering-status]').forEach(node => {
+    node.textContent = status === '回正完成，请确认阻尼' && node.closest('[data-steering-screen="wide"]')
+      ? '回正完成，请在触控屏确认' : status;
+  });
   document.querySelectorAll('[data-steering-steps]').forEach(group => {
     [...group.children].forEach((pill, index) => {
+      pill.hidden = wheelVariant === '1' && index === 0;
+      pill.style.display = pill.hidden ? 'none' : '';
+      pill.textContent = index === 1 ? `${wheelVariant === '1' ? '①' : '②'} 左右打死` : index === 2 ? `${wheelVariant === '1' ? '②' : '③'} 回正与阻尼` : '① 自动转动';
       pill.classList.toggle('done', steeringCompleted || index < steeringStage);
-      pill.classList.toggle('selected', !steeringCompleted && index === steeringStage);
+      pill.classList.toggle('selected', !steeringCompleted && index === Math.floor(steeringStage));
     });
   });
   document.querySelectorAll('[data-steering-damping]').forEach(actions => {
-    actions.hidden = steeringCompleted || steeringStage !== 2 || Math.abs(steeringAngle) > 8;
+    actions.hidden = steeringCompleted || steeringStage !== 2 || Math.abs(steeringAngle) > 5;
   });
+  document.querySelectorAll('[data-steering-unable]').forEach(button => button.hidden = steeringCompleted || steeringStage !== 1);
+}
+
+function animateSteeringTargets(targets, done) {
+  const token = ++steeringMotionToken;
+  const variant = wheelVariant;
+  let index = 0;
+  const tick = () => {
+    if (token !== steeringMotionToken || variant !== wheelVariant || step !== 'h2') return;
+    const delta = targets[index] - steeringAngle;
+    steeringAngle += Math.sign(delta) * Math.min(Math.abs(delta), 12);
+    updateSteeringUI();
+    if (Math.abs(delta) <= 12) index += 1;
+    if (index === targets.length) { done(); updateSteeringUI(); return; }
+    scheduleMotion(tick, 20);
+  };
+  scheduleMotion(tick, 20);
+}
+
+function waitBeforeSteeringReturn() {
+  steeringStage = 1.5;
+  const token = ++steeringMotionToken;
+  const variant = wheelVariant;
+  updateSteeringUI();
+  scheduleMotion(() => {
+    if (token !== steeringMotionToken || variant !== wheelVariant || step !== 'h2') return;
+    steeringStage = 2;
+    animateSteeringTargets([0], () => {});
+    updateSteeringUI();
+  }, 500);
+}
+
+function startSteeringSequence() {
+  steeringMotionToken += 1;
+  if (steeringCompleted) return;
+  if (wheelVariant === '1' && steeringStage === 0) steeringStage = 1;
+  if (wheelVariant === '2' && steeringStage === 0) {
+    animateSteeringTargets([-470, 470, 0], () => { steeringStage = 1; });
+  } else if (steeringStage === 1.5) {
+    waitBeforeSteeringReturn();
+  } else if (steeringStage === 2 && Math.abs(steeringAngle) > 5) {
+    animateSteeringTargets([0], () => {});
+  }
+  updateSteeringUI();
 }
 
 function completeSteeringInspection() {
@@ -651,20 +809,23 @@ function completeSteeringInspection() {
   steeringCompleted = true;
   document.body.classList.remove('steering-damping-error');
   updateSteeringUI();
-  if (document.querySelector('[data-demo="play"]')?.classList.contains('active')) scheduleMotion(advancePlayback, 650);
+  completeInspectionStep('h2');
 }
 
 function setSteeringAngle(nextAngle) {
   if (steeringCompleted || motionPaused || step !== 'h2') return;
-  steeringAngle = Math.max(-450, Math.min(450, nextAngle));
+  if (steeringStage !== 1) return;
+  steeringAngle = Math.max(-470, Math.min(470, nextAngle));
   steeringMaxLeft = Math.max(steeringMaxLeft, -Math.min(0, steeringAngle));
   steeringMaxRight = Math.max(steeringMaxRight, Math.max(0, steeringAngle));
 
   if (steeringStage === 0 && Math.abs(steeringAngle) >= 60) steeringStage = 1;
   if (steeringStage === 1) {
-    if (steeringAngle <= -420) steeringHitLeft = true;
-    if (steeringAngle >= 420) steeringHitRight = true;
-    if (steeringHitLeft && steeringHitRight) steeringStage = 2;
+    if (steeringAngle <= -440) steeringHitLeft = true;
+    if (steeringAngle >= 440) steeringHitRight = true;
+    if (steeringHitLeft && steeringHitRight) {
+      waitBeforeSteeringReturn();
+    }
   }
   updateSteeringUI();
 }
@@ -676,7 +837,8 @@ function steeringPointerAngle(event, wheel) {
 
 function startSteeringDrag(event) {
   const wheel = event.currentTarget;
-  if (motionPaused || steeringCompleted || step !== 'h2') return;
+  if (motionPaused || steeringCompleted || step !== 'h2' || steeringStage !== 1) return;
+  if (event.pointerType === 'mouse' && event.button !== 0) return;
   steeringDrag = { wheel, pointerId: event.pointerId, last: steeringPointerAngle(event, wheel) };
   wheel.classList.add('dragging');
   wheel.setPointerCapture?.(event.pointerId);
@@ -685,6 +847,10 @@ function startSteeringDrag(event) {
 
 function moveSteeringDrag(event) {
   if (!steeringDrag || event.pointerId !== steeringDrag.pointerId) return;
+  if (event.pointerType === 'mouse' && !(event.buttons & 1)) {
+    endSteeringDrag(event);
+    return;
+  }
   const current = steeringPointerAngle(event, steeringDrag.wheel);
   let delta = current - steeringDrag.last;
   if (delta > 180) delta -= 360;
@@ -734,11 +900,12 @@ function releasePedal() {
   pedalPress = null;
   if (passed) pedalStage += 1;
   document.querySelectorAll(`.pedal-card[data-pedal="${pedal}"]`).forEach(card => {
-    card.querySelector('[data-value]').textContent = '0%';
-    card.querySelector('i b').style.setProperty('--pedal-value', '0%');
+    card.querySelector('[data-value]').textContent = passed ? '100%' : '0%';
+    card.querySelector('i b').style.setProperty('--pedal-value', passed ? '100%' : '0%');
   });
   document.querySelectorAll('.pedal-card').forEach(card => card.classList.toggle('current', card.dataset.pedal === (pedalStage === 0 ? 'brake' : pedalStage === 1 ? 'throttle' : '')));
   document.querySelectorAll('.pedal-status').forEach(label => label.textContent = pedalStage === 2 ? '踏板检测完成' : `请踩下${pedalStage === 0 ? '刹车' : '电门'}踏板`);
+  if (pedalStage === 2) completeInspectionStep('h4');
 }
 
 function resetInteractiveStates() { delete wheelStates['1']; delete wheelStates['2']; resetTouchTargets(); resetKeyTargets(); resetPedals(); resetSteeringInspection(); }
@@ -798,6 +965,18 @@ function retryFailureStep() {
 }
 
 buttons.forEach(button => button.addEventListener('click', () => setViewMode(button.dataset.view)));
+document.querySelectorAll('#operationS3Screen .flow-op-actions>div').forEach(action => {
+  action.setAttribute('role', 'button');
+  action.tabIndex = 0;
+  const confirm = () => {
+    if (step !== 's3' || motionPaused || screens.s3.operation.classList.contains('sound-playing')) return;
+    if (action.classList.contains('no')) failureSelect.value = 's3';
+    else if (failureSelect.value === 's3') failureSelect.value = 'none';
+    completeInspectionStep('s3');
+  };
+  action.addEventListener('click', confirm);
+  action.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); confirm(); } });
+});
 stepButtons.forEach(button => button.addEventListener('click', () => { stopPlayback(); setDemoState(''); setStep(button.dataset.step); }));
 demoButtons.forEach(button => button.addEventListener('click', () => {
   const action = button.dataset.demo;
@@ -815,11 +994,14 @@ demoButtons.forEach(button => button.addEventListener('click', () => {
   setMotionPaused(false);
   if (action === 'ready') { resetInteractiveStates(); setStep('ready'); }
   if (action === 'pass') setStep('pass');
+  if (action === 'warning') { renderResultLists(); setStep('warning'); }
+  if (action === 'monitor') { renderResultLists(); setStep('monitor'); }
   if (action === 'fail') { updateFailureMessage(); setStep('fail'); }
   setDemoState(action);
 }));
 
 document.querySelectorAll('[data-start-inspection]').forEach(button => button.addEventListener('click', startPlayback));
+document.querySelectorAll('[data-retry-warning]').forEach(button => button.addEventListener('click', () => navigateToStep('s3')));
 document.querySelectorAll('[data-restart-inspection]').forEach(button => button.addEventListener('click', retryFailureStep));
 document.querySelectorAll('[data-enter-system]').forEach(button => button.addEventListener('click', enterSystem));
 document.querySelectorAll('[data-return-ready]').forEach(button => button.addEventListener('click', () => { resetInteractiveStates(); setStep('ready'); setDemoState('ready'); }));
@@ -845,18 +1027,40 @@ document.querySelectorAll('[data-steering-wheel]').forEach(wheel => {
   wheel.addEventListener('pointermove', moveSteeringDrag);
   wheel.addEventListener('pointerup', endSteeringDrag);
   wheel.addEventListener('pointercancel', endSteeringDrag);
+  wheel.addEventListener('lostpointercapture', endSteeringDrag);
   wheel.addEventListener('keydown', event => {
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
     setSteeringAngle(steeringAngle + (event.key === 'ArrowLeft' ? -20 : 20));
     event.preventDefault();
   });
 });
+window.addEventListener('pointerup', endSteeringDrag);
+window.addEventListener('pointercancel', endSteeringDrag);
+window.addEventListener('blur', () => {
+  if (steeringDrag) {
+    steeringDrag.wheel.classList.remove('dragging');
+    steeringDrag = null;
+  }
+});
 document.querySelectorAll('[data-damping]').forEach(button => button.addEventListener('click', () => {
-  if (steeringStage !== 2 || Math.abs(steeringAngle) > 8) return;
-  if (button.dataset.damping === 'normal') return completeSteeringInspection();
-  document.body.classList.add('steering-damping-error');
-  updateSteeringUI();
+  if (steeringStage !== 2 || Math.abs(steeringAngle) > 5) return;
+  dampingResult = button.dataset.damping === 'normal' ? '正常' : '异常';
+  document.querySelectorAll('[data-steering-wheel]').forEach(wheel => wheel.dataset.dampingResult = dampingResult);
+  completeSteeringInspection();
 }));
+document.querySelectorAll('[data-steering-screen="operation"]').forEach(panel => {
+  const button = document.createElement('button');
+  button.dataset.steeringUnable = '';
+  button.className = 'steering-unable';
+  button.textContent = '无法打死？';
+  button.addEventListener('click', () => {
+    if (step !== 'h2' || steeringStage !== 1) return;
+    failureSelect.value = 'h2';
+    failureDetails.h2 = '方向盘未转到位，左右最大角度未达到要求';
+    stopPlayback(); updateFailureMessage(); setStep('fail'); setDemoState('fail');
+  });
+  panel.append(button);
+});
 failureSelect.addEventListener('change', updateFailureMessage);
 skipDialog.querySelector('[data-skip-cancel]').addEventListener('click', () => closeSkipDialog(true));
 skipDialog.querySelector('[data-skip-confirm]').addEventListener('click', enterSystem);
@@ -910,7 +1114,19 @@ document.addEventListener('keydown', event => {
 });
 
 window.addEventListener('resize', fitScreen);
-document.querySelectorAll('[data-wheel]').forEach(button => button.addEventListener('click', () => switchWheel(button.dataset.wheel)));
+document.querySelectorAll('[data-wheel]').forEach(button => button.addEventListener('click', () => {
+  stopPlayback();
+  setDemoState('');
+  closeSkipDialog(false);
+  setStep('ready');
+  switchWheel(button.dataset.wheel);
+  resetInteractiveStates();
+  playIndex = 0;
+  document.querySelectorAll('[data-wheel]').forEach(item => {
+    item.classList.toggle('active', item === button);
+    item.setAttribute('aria-pressed', String(item === button));
+  });
+}));
 const h1KeyboardIcon = document.querySelector('.h1-node-keyboard img');
 if (h1KeyboardIcon) {
   h1KeyboardIcon.src = 'assets/svg/h1-keyboard.svg';
