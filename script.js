@@ -69,7 +69,9 @@ const failureSelect = document.getElementById('failureSelect');
 const widePreviewFrame = document.getElementById('widePreviewFrame');
 const operationPreviewFrame = document.getElementById('operationPreviewFrame');
 const skipDialog = document.getElementById('skipDialog');
+NetworkInspection.mount();
 const screens = {
+  net: { wide: document.getElementById('wideNetworkScreen'), operation: document.getElementById('operationNetworkScreen') },
   s1: { wide: document.getElementById('wideS1Screen'), operation: document.getElementById('operationS1Screen') },
   s2: { wide: document.getElementById('wideS2Screen'), operation: document.getElementById('operationS2Screen') },
   s3: { wide: document.getElementById('wideS3Screen'), operation: document.getElementById('operationS3Screen') },
@@ -87,7 +89,7 @@ const screens = {
 };
 
 const inspectionSteps = [
-  ['s1', 'S1', '登录状态'], ['s2', 'S2', '软件与双屏'], ['s3', 'S3', '声音外放'],
+  ['s1', 'S1', '登录状态'], ['s2', 'S2', '软件与双屏'], ['net', 'S3', '网络检测'], ['s3', 'S4', '声音外放'],
   ['h1', 'H1', '操作套件连接'], ['h2', 'H2', '方向盘转向'], ['h3', 'H3', '方向盘按键与拨片'],
   ['h4', 'H4', '刹车与电门踏板'], ['h5', 'H5', '触控屏触摸']
 ];
@@ -98,6 +100,7 @@ const failureMessages = {
 };
 const failureStepMap = { none: 'h4', h4: 'h4', h2: 'h2', 'h3-key': 'h3', 'h3-normal': 'h3', s3: 's3' };
 const resultMethods = { s1: '自动检测', s2: '自动检测', s3: '手动操作', h1: '自动检测', h2: '手动操作', h3: '手动操作', h4: '手动操作', h5: '手动操作' };
+resultMethods.net = '自动检测';
 const failureDetails = {
   none: '电门踏板没有响应（读数停在 12%），请检查踏板连接或联系运维',
   h4: '电门踏板没有响应（读数停在 12%），请检查踏板连接或联系运维',
@@ -108,11 +111,11 @@ const failureDetails = {
 };
 let keySequence = [
   { code: 'P', name: '挂P挡', x: 63.2, y: 43.1, size: 86, asset: 'key-p.svg' },
-  { code: 'PL', name: '驻车灯', x: 36.68, y: 43.68, size: 86, asset: 'key-pl.svg' },
   { code: 'A', name: '左转向灯', x: 71.7, y: 56.5, size: 69 },
   { code: 'B', name: '右转向灯', x: 76.7, y: 52, size: 69 },
   { code: 'Y', name: '鸣笛', x: 71.7, y: 47.5, size: 69 },
   { code: 'N', name: '问题打点', x: 37.5, y: 43.1, size: 86, asset: 'key-n.svg' },
+  { code: 'RT', name: '点击执行/取消双闪', x: 68.03, y: 35.8, size: 86, asset: 'key-rt.svg' },
   { code: 'RADIO', name: '紧急停车', x: 34.2, y: 68.8, size: 129, asset: 'key-radio.svg' },
   { code: 'START', name: '接管确认', x: 66.5, y: 68.8, size: 129, asset: 'key-start.svg' },
   { code: 'R', name: '左拨片', x: 17.5, y: 37, size: 86, asset: 'key-r.svg' },
@@ -144,7 +147,7 @@ function switchWheel(variant) {
   if (saved) {
     ({keyIndex,steeringStage,steeringAngle,steeringMaxLeft,steeringMaxRight,steeringHitLeft,steeringHitRight,steeringCompleted} = saved);
   } else { resetKeyTargets(); resetSteeringInspection(); }
-  document.querySelectorAll('[data-steering-wheel],.key-wheel>img,.op-key-wheel>img').forEach(img => img.src = `assets/images/figma/${variant === '2' ? 'steering-wheel-2.png' : 'steering-wheel-updated.png'}`);
+  document.querySelectorAll('[data-steering-wheel],.key-wheel>img,.op-key-wheel>img').forEach(img => img.src = `assets/images/figma/${variant === '2' ? 'steering-wheel-2-v2.png' : 'steering-wheel-1-v2.png'}`);
   document.querySelectorAll('[data-wheel]').forEach(button => {
     button.classList.toggle('active', button.dataset.wheel === variant);
     button.setAttribute('aria-pressed', String(button.dataset.wheel === variant));
@@ -186,7 +189,7 @@ function renderSidebars() {
     const figmaOpS3 = sidebar.closest('#operationS3Screen');
     const figmaOpH1 = sidebar.closest('#operationH1Screen');
     const labels = {
-      s1: '安全员登录信息校验', s2: '软件启动与双屏显示', s3: '声音外放', h1: '操作套件连接',
+      s1: '安全员登录信息校验', s2: '软件启动与双屏显示', net: '网络检测', s3: '声音外放', h1: '操作套件连接',
       h2: '方向盘', h3: '方向盘按键与拨片', h4: '刹车/电门踏板', h5: '触控屏触摸输入'
     };
     const makeRow = (key, hardware = false) => {
@@ -212,14 +215,14 @@ function renderSidebars() {
       const softwareIconSrc = 'assets/svg/figma/wide-s1/software.svg';
       const hardwareIconSrc = 'assets/svg/figma/wide-s1/hardware.svg';
       const dividerIcon = figmaWideS1 ? 'divider.svg' : 'wide-sidebar-divider.svg';
-      sidebar.innerHTML = `<section class="wide-v2-group wide-v2-software"><div class="wide-v2-group-title"><img src="${softwareIconSrc}" width="66" height="66" alt=""><h2>软件点检</h2></div><div class="wide-v2-list">${['s1','s2','s3'].map(key => makeRow(key)).join('')}</div></section><img class="wide-v2-divider" src="${wideAssetRoot}/${dividerIcon}" width="1296" height="2" alt=""><section class="wide-v2-group wide-v2-hardware"><div class="wide-v2-group-title"><img src="${hardwareIconSrc}" width="66" height="66" alt=""><h2>硬件点检</h2></div><div class="wide-v2-list">${['h1','h2','h3','h4','h5'].map(key => makeRow(key, true)).join('')}</div></section>`;
+      sidebar.innerHTML = `<section class="wide-v2-group wide-v2-software"><div class="wide-v2-group-title"><img src="${softwareIconSrc}" width="66" height="66" alt=""><h2>软件点检</h2></div><div class="wide-v2-list">${['s1','s2','net','s3'].map(key => makeRow(key)).join('')}</div></section><img class="wide-v2-divider" src="${wideAssetRoot}/${dividerIcon}" width="1296" height="2" alt=""><section class="wide-v2-group wide-v2-hardware"><div class="wide-v2-group-title"><img src="${hardwareIconSrc}" width="66" height="66" alt=""><h2>硬件点检</h2></div><div class="wide-v2-list">${['h1','h2','h3','h4','h5'].map(key => makeRow(key, true)).join('')}</div></section>`;
     } else {
       sidebar.className = 'op-sidebar js-flow-sidebar';
       const opAssetRoot = figmaOpS3 ? 'assets/svg/figma/op-s3' : figmaOpH1 ? 'assets/svg/figma/op-h1' : 'assets/svg';
       const opSoftwareIconSrc = 'assets/svg/figma/wide-s1/software.svg';
       const opHardwareIconSrc = 'assets/svg/figma/wide-s1/hardware.svg';
       const opDividerIcon = figmaOpS3 ? 'divider.svg' : figmaOpH1 ? 'sidebar-divider.svg' : 'op-divider.svg';
-      sidebar.innerHTML = `<section><div class="op-category"><img src="${opSoftwareIconSrc}" width="44" height="44" alt=""><h2>软件点检</h2></div><div class="op-list">${['s1','s2','s3'].map(key => makeRow(key)).join('')}</div></section><img class="op-divider" src="${opAssetRoot}/${opDividerIcon}" width="429" height="1" alt=""><section class="op-hardware-section"><div class="op-category"><img src="${opHardwareIconSrc}" width="44" height="44" alt=""><h2>硬件点检</h2></div><div class="op-list">${['h1','h2','h3','h4','h5'].map(key => makeRow(key, true)).join('')}</div></section>`;
+      sidebar.innerHTML = `<section><div class="op-category"><img src="${opSoftwareIconSrc}" width="44" height="44" alt=""><h2>软件点检</h2></div><div class="op-list">${['s1','s2','net','s3'].map(key => makeRow(key)).join('')}</div></section><img class="op-divider" src="${opAssetRoot}/${opDividerIcon}" width="429" height="1" alt=""><section class="op-hardware-section"><div class="op-category"><img src="${opHardwareIconSrc}" width="44" height="44" alt=""><h2>硬件点检</h2></div><div class="op-list">${['h1','h2','h3','h4','h5'].map(key => makeRow(key, true)).join('')}</div></section>`;
     }
   });
 }
@@ -421,13 +424,13 @@ function setStep(nextStep) {
   inspectionSteps.forEach(([stepId], index) => {
     Object.values(screens[stepId]).forEach(screen => {
       screen?.querySelectorAll('header .wide-v2-title b, header .op-title b, header .ready-brand b').forEach(badge => {
-        badge.textContent = `点检中 ${index + 1}/8`;
+        badge.textContent = `点检中 ${index + 1}/${inspectionSteps.length}`;
       });
       screen?.querySelectorAll('.flow-wide-progress > strong, .wide-v2-progress-current').forEach(label => {
         label.textContent = String(index + 1);
       });
       screen?.querySelectorAll('.flow-wide-progress > div > b, .wide-v2-progress-track > b').forEach(bar => {
-        bar.style.width = `${(index + 1) / 8 * 100}%`;
+        bar.style.width = `${(index + 1) / inspectionSteps.length * 100}%`;
       });
     });
   });
@@ -439,6 +442,7 @@ function setStep(nextStep) {
   });
   if (step === 's1') scheduleMotion(() => completeInspectionStep('s1'), 800);
   if (step === 's2') startAutoSequence('s2', 4);
+  if (step === 'net') NetworkInspection.start({ schedule: scheduleMotion, isCurrent: () => step === 'net', complete: () => completeInspectionStep('net') });
   if (step === 's3') startSoundPreview();
   if (step === 'h1') startAutoSequence('h1', 3);
   if (step === 'h2') { updateSteeringUI(); startSteeringSequence(); }
@@ -489,7 +493,8 @@ function schedulePlayback() {
 
 function finishPlayback() {
   const selectedFailure = failureSelect.value;
-  const result = selectedFailure === 'none' ? 'pass' : selectedFailure === 's3' ? 'warning' : 'fail';
+  const network = NetworkInspection.getResult();
+  const result = selectedFailure === 'none' ? (network?.tier === 'poor' ? 'warning' : 'pass') : selectedFailure === 's3' ? 'warning' : 'fail';
   updateFailureMessage();
   setStep(result);
   setDemoState(result);
@@ -533,11 +538,11 @@ function renderResultLists() {
         const icon = failed ? 'assets/svg/figma/fail-wide/fail-status.svg' : passIcon;
         return `<div class="result-side-row${failed ? ' fail' : ''}"><span>${code}</span><strong>${label}</strong><img src="${icon}" width="36" height="36" alt="${failed ? '待修复' : '通过'}"></div>`;
       }).join('');
-      sidebar.innerHTML = `<section class="result-wide-group result-wide-software"><div class="result-wide-group-title"><img src="assets/svg/figma/wide-s1/software.svg" width="66" height="66" alt=""><h2>软件点检</h2></div><div class="result-wide-list">${buildWideRows(inspectionSteps.slice(0, 3), 'assets/svg/figma/fail-wide/complete.svg')}</div></section><img class="result-wide-divider" src="assets/svg/figma/fail-wide/sidebar-divider.svg" width="1296" height="2" alt=""><section class="result-wide-group result-wide-hardware"><div class="result-wide-group-title"><img src="assets/svg/figma/wide-s1/hardware.svg" width="66" height="66" alt=""><h2>硬件点检</h2></div><div class="result-wide-list">${buildWideRows(inspectionSteps.slice(3), 'assets/svg/figma/fail-wide/complete-alt.svg')}</div></section>`;
+      sidebar.innerHTML = `<section class="result-wide-group result-wide-software"><div class="result-wide-group-title"><img src="assets/svg/figma/wide-s1/software.svg" width="66" height="66" alt=""><h2>软件点检</h2></div><div class="result-wide-list">${buildWideRows(inspectionSteps.slice(0, 4), 'assets/svg/figma/fail-wide/complete.svg')}</div></section><img class="result-wide-divider" src="assets/svg/figma/fail-wide/sidebar-divider.svg" width="1296" height="2" alt=""><section class="result-wide-group result-wide-hardware"><div class="result-wide-group-title"><img src="assets/svg/figma/wide-s1/hardware.svg" width="66" height="66" alt=""><h2>硬件点检</h2></div><div class="result-wide-list">${buildWideRows(inspectionSteps.slice(4), 'assets/svg/figma/fail-wide/complete-alt.svg')}</div></section>`;
       return;
     }
     const buildPassWideRows = (steps, passIcon) => steps.map(([, code, label]) => `<div class="result-side-row"><span>${code}</span><strong>${label}</strong><img src="${passIcon}" width="36" height="36" alt="通过"></div>`).join('');
-    sidebar.innerHTML = `<section class="result-wide-group result-wide-software"><div class="result-wide-group-title"><img src="assets/svg/figma/wide-s1/software.svg" width="66" height="66" alt=""><h2>软件点检</h2></div><div class="result-wide-list">${buildPassWideRows(inspectionSteps.slice(0, 3), 'assets/svg/figma/pass-wide/complete.svg')}</div></section><img class="result-wide-divider" src="assets/svg/figma/pass-wide/sidebar-divider.svg" width="1296" height="2" alt=""><section class="result-wide-group result-wide-hardware"><div class="result-wide-group-title"><img src="assets/svg/figma/wide-s1/hardware.svg" width="66" height="66" alt=""><h2>硬件点检</h2></div><div class="result-wide-list">${buildPassWideRows(inspectionSteps.slice(3), 'assets/svg/figma/pass-wide/complete-alt.svg')}</div></section>`;
+    sidebar.innerHTML = `<section class="result-wide-group result-wide-software"><div class="result-wide-group-title"><img src="assets/svg/figma/wide-s1/software.svg" width="66" height="66" alt=""><h2>软件点检</h2></div><div class="result-wide-list">${buildPassWideRows(inspectionSteps.slice(0, 4), 'assets/svg/figma/pass-wide/complete.svg')}</div></section><img class="result-wide-divider" src="assets/svg/figma/pass-wide/sidebar-divider.svg" width="1296" height="2" alt=""><section class="result-wide-group result-wide-hardware"><div class="result-wide-group-title"><img src="assets/svg/figma/wide-s1/hardware.svg" width="66" height="66" alt=""><h2>硬件点检</h2></div><div class="result-wide-list">${buildPassWideRows(inspectionSteps.slice(4), 'assets/svg/figma/pass-wide/complete-alt.svg')}</div></section>`;
   });
   document.querySelectorAll('[data-result-list]').forEach(list => {
     const failing = list.dataset.resultList === 'fail';
@@ -550,16 +555,24 @@ function renderResultLists() {
     }).join('');
   });
   const warningList = document.querySelector('[data-result-list="warning"]');
-  const warningRow = warningList?.children[2];
+  const networkWarning = NetworkInspection.getResult()?.tier === 'poor' && failureSelect.value !== 's3';
+  const warningRow = warningList?.children[networkWarning ? 2 : 3];
   if (warningRow) {
     warningRow.classList.add('warning-row');
-    warningRow.querySelector('strong').innerHTML = '声音外放<small>未听到提示音，请检查扬声器音量或联系运维</small>';
+    warningRow.querySelector('strong').innerHTML = networkWarning ? '网络检测<small>本地链路速率较低，请检查网线与网卡协商速率</small>' : '声音外放<small>未听到提示音，请检查扬声器音量或联系运维</small>';
     warningRow.querySelector('b').textContent = '待跟进';
     warningRow.querySelector('img').src = warningIcon;
     warningRow.querySelector('img').alt = '待跟进';
   }
-  const wideWarningRow = document.querySelector('[data-result-sidebar="warning"] .result-wide-software .result-side-row:nth-child(3)');
+  const wideWarningRow = document.querySelector(`[data-result-sidebar="warning"] .result-wide-software .result-side-row:nth-child(${networkWarning ? 3 : 4})`);
   if (wideWarningRow) { wideWarningRow.classList.add('warning-row'); wideWarningRow.querySelector('img').src = warningIcon; wideWarningRow.querySelector('img').alt = '待跟进'; }
+  document.querySelectorAll('.result-screen .result-count').forEach(count => {
+    const screen = count.closest('.result-screen');
+    const attention = screen.classList.contains('result-warning') || screen.classList.contains('result-fail');
+    const values = count.querySelectorAll('strong');
+    values[0].textContent = String(inspectionSteps.length - (attention ? 1 : 0));
+    values[1].textContent = attention ? '1' : '0';
+  });
 }
 
 function resetTouchTargets() { touchHit = 0; updateTouchBoards(); }
@@ -908,12 +921,12 @@ function releasePedal() {
   if (pedalStage === 2) completeInspectionStep('h4');
 }
 
-function resetInteractiveStates() { delete wheelStates['1']; delete wheelStates['2']; resetTouchTargets(); resetKeyTargets(); resetPedals(); resetSteeringInspection(); }
+function resetInteractiveStates() { NetworkInspection.reset(); delete wheelStates['1']; delete wheelStates['2']; resetTouchTargets(); resetKeyTargets(); resetPedals(); resetSteeringInspection(); }
 
 function prepareNavigation() {
   const rowSelectors = '.wide-v2-row,.flow-wide-row,.flow-op-row,.op-list>div,.wide-list>div';
   document.querySelectorAll(rowSelectors).forEach(row => {
-    const code = row.querySelector('span')?.textContent.trim().toLowerCase();
+    const code = row.dataset.navStep || row.querySelector('span')?.textContent.trim().toLowerCase();
     if (!screens[code] || !inspectionSteps.some(item => item[0] === code)) return;
     row.dataset.navStep = code;
     row.setAttribute('role', 'button');
@@ -965,6 +978,9 @@ function retryFailureStep() {
 }
 
 buttons.forEach(button => button.addEventListener('click', () => setViewMode(button.dataset.view)));
+document.getElementById('networkLinkSelect').addEventListener('change', () => {
+  if (step === 'net') setStep('net');
+});
 document.querySelectorAll('#operationS3Screen .flow-op-actions>div').forEach(action => {
   action.setAttribute('role', 'button');
   action.tabIndex = 0;
@@ -1001,7 +1017,7 @@ demoButtons.forEach(button => button.addEventListener('click', () => {
 }));
 
 document.querySelectorAll('[data-start-inspection]').forEach(button => button.addEventListener('click', startPlayback));
-document.querySelectorAll('[data-retry-warning]').forEach(button => button.addEventListener('click', () => navigateToStep('s3')));
+document.querySelectorAll('[data-retry-warning]').forEach(button => button.addEventListener('click', () => navigateToStep(NetworkInspection.getResult()?.tier === 'poor' ? 'net' : 's3')));
 document.querySelectorAll('[data-restart-inspection]').forEach(button => button.addEventListener('click', retryFailureStep));
 document.querySelectorAll('[data-enter-system]').forEach(button => button.addEventListener('click', enterSystem));
 document.querySelectorAll('[data-return-ready]').forEach(button => button.addEventListener('click', () => { resetInteractiveStates(); setStep('ready'); setDemoState('ready'); }));
@@ -1138,4 +1154,4 @@ resetInteractiveStates();
 updateFailureMessage();
 document.fonts.ready.then(fitScreen);
 setViewMode('dual');
-setStep('h2');
+setStep(new URLSearchParams(location.search).get('step') === 'net' ? 'net' : 'h2');

@@ -714,3 +714,45 @@ body.controls-hidden .preview-bar{transform:translateY(-116px)}body.controls-hid
 body.controls-hidden .preview-bar{transform:translateY(-100%)}
 .figma-wide-pass:not(.result-warning) .wide-v2-title .pass-badge,
 .figma-op-pass:not(.result-warning) .op-title .pass-badge{border-color:rgba(25,198,96,.5)}
+
+/* Ready artwork sits beneath every interface element. */
+#wideReadyScreen,#operationReadyScreen{isolation:isolate}
+#wideReadyScreen::before,#operationReadyScreen::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background-position:center;background-repeat:no-repeat;background-size:100% 100%}
+#wideReadyScreen::before{background-image:url('assets/images/ready/wide-ready-v3.png');opacity:1}
+#operationReadyScreen::before{background-image:url('assets/images/ready/operation-ready-v3.png');opacity:1}
+#wideReadyScreen>*,#operationReadyScreen>*{z-index:1}
+#wideReadyScreen>main,#operationReadyScreen>main{background:transparent!important}
+
+/* S3 network inspection: exact Figma artwork; arc and radial pointer are live SVG. */
+.network-screen .network-art{position:absolute;left:calc(50% - 338px);top:305px;width:685px;height:592px}
+.network-base{display:block;position:absolute;left:0;top:0}
+.network-center{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.network-center{animation:networkCenterFloat 3.6s ease-in-out infinite,networkCenterBreathe 2.8s ease-in-out infinite}
+@keyframes networkCenterFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes networkCenterBreathe{0%,100%{filter:brightness(1) drop-shadow(0 0 5px rgba(255,225,172,.1))}50%{filter:brightness(1.38) drop-shadow(0 0 24px rgba(255,225,172,.5)) drop-shadow(0 0 8px rgba(255,225,172,.25))}}
+@media(prefers-reduced-motion:reduce){.network-center{animation:none}}
+.network-overlay{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.network-arc{stroke:var(--network-color,#FFE1AC);filter:drop-shadow(0 0 9px rgba(255,225,172,.4))}
+.network-reading{position:absolute;left:229px;top:218px;width:242px;text-align:center;display:flex;flex-direction:column;gap:15px}
+.network-reading strong{font-family:Arial,sans-serif;font-size:96px;font-weight:600;line-height:115px;color:#f5f5f5}
+.network-reading span{color:var(--network-color,#FFE1AC);font-size:35.511px;line-height:1.3;white-space:nowrap}
+.network-screen .flow-wide-main>h2{top:171px;font-size:70px}
+.network-screen .network-status{position:absolute!important;left:0!important;right:0!important;top:897px!important;margin:0!important;text-align:center;color:rgba(255,255,255,.6);font-size:36px}
+.network-screen.network-done .network-status{color:var(--network-color)}
+.network-screen .network-note{position:absolute!important;left:0!important;right:0!important;top:953px!important;margin:0!important;text-align:center;font-size:24px;color:rgba(255,255,255,.45)}
+.operation-screen.network-screen .network-art{left:calc(50% - 298px);top:175px;width:603px;height:525px}
+.operation-screen.network-screen .network-reading{left:201px;top:192px;width:213px;gap:13.2px}
+.operation-screen.network-screen .network-reading strong{font-size:85px;line-height:102px}
+.operation-screen.network-screen .network-reading span{font-size:28px}
+.operation-screen.network-screen .network-status{top:721px!important;font-size:28px}
+.operation-screen.network-screen .network-note{top:768px!important;font-size:20px}
+.network-screen .network-note[hidden]{display:none}
+/* Four software checks and five hardware checks now share the sidebar. */
+.wide-v2-divider,.figma-wide-s1 .wide-v2-divider{top:534px}
+.wide-v2-hardware,.figma-wide-s1 .wide-v2-hardware{top:582px}
+.op-divider,#operationH1Screen .op-divider,.figma-op-s3 .op-divider{top:404px}
+.op-hardware-section,#operationH1Screen .op-hardware-section,.figma-op-s3 .op-hardware-section{top:448px}
+.figma-wide-pass .result-wide-hardware,.figma-wide-fail .result-wide-hardware{top:582px}
+.figma-wide-pass .result-wide-divider,.figma-wide-fail .result-wide-divider{top:534px}
+.figma-op-pass .result-table,.figma-op-fail .result-table{max-height:684px;overflow-y:auto}
+.figma-op-pass .result-row,.figma-op-fail .result-row{height:76px;min-height:76px}
